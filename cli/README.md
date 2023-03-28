@@ -45,7 +45,7 @@ Given the repetitive nature of writing React unit tests, a code generator script
 [] Compose list of deep conditional renders
 [] Compose list of deep interactive elements
 [] Compose list of shallow non-interactive conditional renders
-[] Compose list of shallow interactive conditional renders
+[] Compose list of shallow interactive element
 [] Compose list of required imports for testing tools (testing-library, userEvents)
 [] Prepare access condition tests for each shallow non-interactive conditional render
 [] Prepare restriction condition tests for each shallow non-interactive conditional render
