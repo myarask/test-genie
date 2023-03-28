@@ -2,13 +2,15 @@
   "name": "test-genie",
   "version": "0.0.0",
   "description": "Test Generator for Web Apps",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "ts-node-dev --respawn --no-notify --ignore-watch node_modules src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "esbuild": "0.17.14"
+  "devDependencies": {
+    "ts-node-dev": "^2.0.0"
   }
 }
