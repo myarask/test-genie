@@ -31,3 +31,5 @@ In practice, automated or not, writing unit tests for React components boils dow
 - Assert outcomes
 
 ## Examples
+
+- [SideNavigation](https://github.com/myarask/test-genie/blob/main/samples/src/components/SideNavigation/SideNavigation.tsx)
