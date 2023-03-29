@@ -2,7 +2,7 @@
 
 ## Mission
 
-To free developers from writing web app unit tests
+To free web developers from writing unit tests
 
 ## Concept
 
