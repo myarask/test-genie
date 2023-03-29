@@ -63,7 +63,7 @@ Script generated tests will always have the same output to each input. This is a
 [] v1 published to npm
 ```
 
-### Version 1
+### 1.0.0
 
 ```
 [] Pipeline integrations
