@@ -1,8 +1,8 @@
-# test-genie
+# Test Genie
 
 ## Mission
 
-To lift the burden of unit testing from web developers
+To lift the burden of unit testing from web developers, while improving quality
 
 ## Get Started
 
