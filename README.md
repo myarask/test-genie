@@ -6,7 +6,7 @@ To lift the burden of unit testing from web developers
 
 ## Quick Start
 
-The test genie CLI will create test files for any files matching the glob pattern.
+The test genie CLI will create test files for any files matching the glob pattern. The tgen CLI will closely resemble the eslint CLI.
 
 ### Creating tests for a file
 
