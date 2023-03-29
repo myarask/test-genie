@@ -17,7 +17,7 @@ npx tgen MyComponent.tsx
 ### Creating tests for a project
 
 ```sh
-npx tgen .
+npx tgen *
 ```
 
 ## Concept
