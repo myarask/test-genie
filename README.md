@@ -4,7 +4,9 @@
 
 To lift the burden of unit testing from web developers, while improving quality
 
-## Get Started
+## Quick Start
+
+The test genie CLI will create test files for any files matching the glob pattern
 
 ### Creating tests for a file
 
@@ -30,7 +32,9 @@ The key to preventing breaking changes is to track the interactive elements and 
 
 ## What about human and AI generated tests?
 
-Script generated tests will always have the same output to each input. This is an advantage that human and AI generated tests don't have. However, there is no reason why a developer should have to choose between them. It is viable to use all three sources for redundancy.
+Script generated tests will always have the same output to each input. This is an advantage that human and AI generated tests don't have.
+
+However, there is no reason why a developer should have to choose between them. It is viable to use all three sources for redundancy.
 
 ```
 ├── src
