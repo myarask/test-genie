@@ -10,14 +10,14 @@ The test genie CLI will create test files for any files matching the glob patter
 
 ### Creating tests for a file
 
-```
+```sh
 npx tgen MyComponent.tsx
 ```
 
 ### Creating tests for a project
 
-```
-npx tgen src/**
+```sh
+npx tgen .
 ```
 
 ## Concept
