@@ -47,21 +47,26 @@ Script generated tests will always have the same output to each input. This is a
 
 ### Alpha
 
+```
 [] Capable of testing functional components
 [] Beta published to npm
+```
 
 ### Beta
 
+```
 [] Support Plugins
 [] Capable of testing hooks
 [] Capable of testing REST controllers
 [] Capable of testing GraphQL resolvers
 [] Online documentation
 [] v1 published to npm
+```
 
 ### Version 1
 
+```
 [] Pipeline integrations
 [] Breaking-change detection
 [] Custom eslint plugins
-...
+```
