@@ -19,9 +19,9 @@ In practice, automated or not, writing unit tests for React components boils dow
 
 ### Test Restriction Conditions of Conditional Renders
 
-1. mock the conditions which make the element accessible
-2. render the component
-3. assert the element's inaccessibility (invisible/disabled/readonly)
+1. Mock the conditions which make the element accessible
+2. Render the component
+3. Assert the element's inaccessibility (invisible/disabled/readonly)
 
 ### Test Outcomes from Interactive Elements
 
