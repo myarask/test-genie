@@ -59,7 +59,6 @@ However, there is no reason why a developer should have to choose between them. 
 ### Beta
 
 ```
-[] Support Plugins
 [] Capable of testing hooks
 [] Capable of testing REST controllers
 [] Capable of testing GraphQL resolvers
@@ -73,4 +72,6 @@ However, there is no reason why a developer should have to choose between them. 
 [] Pipeline integrations
 [] Breaking-change detection
 [] Custom eslint plugins
+
+etc...
 ```
