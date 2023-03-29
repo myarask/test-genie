@@ -32,6 +32,7 @@ The key to preventing breaking changes is to track the interactive elements and 
 
 Script generated tests will always have the same output to each input. This is an advantage that human and AI generated tests don't have. However, there is no reason why a developer should have to choose between them. It is viable to use all three sources for redundancy.
 
+```
 ├── src
 │ ├── components
 │ │ ├── MyComponent
@@ -40,6 +41,7 @@ Script generated tests will always have the same output to each input. This is a
 │ │ │ ├──MyComponent.test.tsx
 │ │ │ ├──MyComponent.tgen.test.tsx
 │ │ │ ├──MyComponent.ai.test.tsx
+```
 
 ## Roadmap
 
