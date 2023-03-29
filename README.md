@@ -2,11 +2,11 @@
 
 ## Mission
 
-To lift the burden of unit testing from web developers, while improving quality
+To lift the burden of unit testing from web developers
 
 ## Quick Start
 
-The test genie CLI will create test files for any files matching the glob pattern
+The test genie CLI will create test files for any files matching the glob pattern.
 
 ### Creating tests for a file
 
