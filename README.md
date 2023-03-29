@@ -59,7 +59,7 @@ However, there is no reason why a developer should have to choose between them. 
 ### Beta
 
 ```
-[] Support Plugins
+[] Capable of testing class components
 [] Capable of testing hooks
 [] Capable of testing REST controllers
 [] Capable of testing GraphQL resolvers

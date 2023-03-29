@@ -1,43 +1,28 @@
 import * as ts from "typescript";
 import * as fs from "fs";
+import glob from "glob";
+import yargs from "yargs";
 
-const processFile = (fileName: string) => {
-  const fileContent = fs.readFileSync(fileName);
-};
+const main = async () => {
+  const globs = process.argv.slice(2);
 
-const main = () => {
-  const fileName = "samples/import/index.ts";
-  const fileContent = fs.readFileSync(fileName, "utf-8");
-  const sourceFile = ts.createSourceFile(
-    fileName,
-    fileContent,
-    ts.ScriptTarget.Latest,
-    true
-  );
+  const targets = await glob(globs, {
+    nodir: true,
+    ignore: "node_modules/**",
+    signal: AbortSignal.timeout(1000),
+  });
 
-  const visitNode = (node: ts.Node) => {
-    if (ts.isImportDeclaration(node)) {
-      console.log(node);
-      console.log(node.moduleSpecifier.getText());
-      //   node.importClause?.namedBindings?.forEachChild((node) => {
-      //     node.end;
-      //   });
+  console.log({ globs, targets });
 
-      // Get the module name
-      const moduleName = node.moduleSpecifier.getText().replace(/['"]/g, "");
-
-      console.log(moduleName);
-      // Get the module path
-      //   const modulePath = require.resolve(moduleName);
-      //   // Get the module content
-      //   const moduleContent = fs.readFileSync(modulePath, "utf-8");
+  targets.forEach((filePath) => {
+    // Read the contents of the TypeScript file
+    const fileContents = ts.sys.readFile(filePath);
+    if (!fileContents) {
+      throw new Error(`Could not read file: ${filePath}`);
     }
-    ts.forEachChild(node, visitNode);
-  };
 
-  visitNode(sourceFile);
-
-  //   console.log(fileContent);
+    console.log(filePath);
+  });
 };
 
 main();
