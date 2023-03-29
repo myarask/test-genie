@@ -23,6 +23,7 @@ npx tgen src/**
 This project asserts that the purpose of web app unit tests is to protect against unintentional breaking changes to the user experience.
 
 > In frontend apps, a breaking change occurs when any interactive element is removed or altered. (relocation is not a breaking change).
+
 > In backend apps, a breaking change occurs when any piece of an API contract is removed or altered. (adding to the contract is not a breaking change).
 
 The key to preventing breaking changes is to track the interactive elements and API contracts. Procedurally generated unit tests are excellent at tracking breaking changes. For example, if a PR includes the removal of a procedurally generated test, the PR is guaranteed to include breaking changes.
@@ -31,10 +32,14 @@ The key to preventing breaking changes is to track the interactive elements and 
 
 Script generated tests will always have the same output to each input. This is an advantage that human and AI generated tests don't have. However, there is no reason why a developer should have to choose between them. It is viable to use all three sources for redundancy.
 
-> MyComponent.tsx
-> MyComponent.test.tsx // Created by a human
-> MyComponent.ai.test.tsx // Created by an AI
-> MyComponent.tgen.test.tsx // Created by a script
+├── src
+│ ├── components
+│ │ ├── MyComponent
+│ │ │ ├──index.ts
+│ │ │ ├──MyComponent.tsx
+│ │ │ ├──MyComponent.test.tsx
+│ │ │ ├──MyComponent.tgen.test.tsx
+│ │ │ ├──MyComponent.ai.test.tsx
 
 ## Roadmap
 
