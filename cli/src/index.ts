@@ -1,25 +1,25 @@
 import * as ts from "typescript";
-import * as fs from "fs";
-import glob from "glob";
-import yargs from "yargs";
+import isBarrelFile from "./isBarrelFile";
+import { getFilePaths } from "./getFilePaths";
 
 const main = async () => {
-  const globs = process.argv.slice(2);
+  const filePaths = await getFilePaths();
 
-  const targets = await glob(globs, {
-    nodir: true,
-    ignore: "node_modules/**",
-    signal: AbortSignal.timeout(1000),
-  });
-
-  console.log({ globs, targets });
-
-  targets.forEach((filePath) => {
+  filePaths.forEach((filePath) => {
     // Read the contents of the TypeScript file
-    const fileContents = ts.sys.readFile(filePath);
-    if (!fileContents) {
-      throw new Error(`Could not read file: ${filePath}`);
-    }
+    const fileContent = ts.sys.readFile(filePath);
+    if (!fileContent) throw new Error(`Could not read file: ${filePath}`);
+
+    // Do not test barrel files
+    if (isBarrelFile(fileContent)) return;
+
+    // Parse the TypeScript file
+    const sourceFile = ts.createSourceFile(
+      filePath,
+      fileContent,
+      ts.ScriptTarget.Latest,
+      true
+    );
 
     console.log(filePath);
   });
