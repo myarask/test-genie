@@ -1,4 +1,4 @@
-import { getFilePaths } from "./getFilePaths";
+import { getFilePaths } from "./globbing/getFilePaths";
 import generateTests from "./generateTests";
 
 const main = async () => {

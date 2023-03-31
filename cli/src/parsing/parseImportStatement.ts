@@ -1,3 +1,5 @@
+// TODO: Give labels to groups in regex
+// import ${defaultImport}${namedImports} from ${source};
 const regex = /import ((\* as )?.+?)?({.+?})? from "(.+?)"/gs;
 
 export type ParsedImportStatement =
@@ -14,6 +16,8 @@ const parseImportStatement = (
   importStatement: string
 ): ParsedImportStatement => {
   let m;
+
+  console.log(importStatement);
 
   while ((m = regex.exec(importStatement)) !== null) {
     // This is necessary to avoid infinite loops with zero-width matches
