@@ -15,6 +15,7 @@ export const getFilePaths = () => {
     throw new Error("Can only match with .js, .jsx, .ts, .tsx, * or **");
   });
 
+  // TODO: Use ignore options instead of deriving globsWithExtensions
   return glob(globsWithExtensions, {
     nodir: true,
     ignore: [
