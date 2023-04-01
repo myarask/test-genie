@@ -1,6 +1,3 @@
-// TODO: Give labels to groups in regex
-// import ${defaultImport}${namedImports} from ${source};
-
 export type ParsedImportStatement = {
   defaultImport?: string;
   namedImports: string[];
@@ -8,7 +5,6 @@ export type ParsedImportStatement = {
 };
 
 // Accepts an import statement and returns an object with the default import, named imports and source
-// TODO: ignore commented import statements
 const parseImportStatement = (
   importStatement: string
 ): ParsedImportStatement => {
@@ -20,7 +16,7 @@ const parseImportStatement = (
     .trim();
 
   // Not sure why this regex needs to be scoped to the function, but it does
-  // TODO: Give labels to groups in regex
+  // TODO: Improve legibility of regex
   const regex = /import ((\* as )?.+?)?({.+?})? from "(.+?)"/gs;
 
   // TODO: Implement without loop?
@@ -57,6 +53,8 @@ const parseImportStatement = (
       defaultImport = group1;
     }
 
+    // Clean up trailing commas
+    // TODO: Improve regex to avoid this
     defaultImport = defaultImport?.trim()?.replaceAll(",", "");
 
     return {

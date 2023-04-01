@@ -1,7 +1,7 @@
 import ts from "typescript";
 import isBarrelFile from "./scanning/isBarrelFile";
 import surveyFile from "./surveying/surveyFile";
-import writeTestFile from "./writing/writeTestFile";
+import prepareTestContent from "./writing/prepareTestContent";
 
 const generateTests = async (filePath: string) => {
   const fileContent = ts.sys.readFile(filePath);
@@ -12,10 +12,7 @@ const generateTests = async (filePath: string) => {
   if (isBarrelFile(fileContent)) return;
 
   const surveyedFile = surveyFile(fileContent);
-
-  // console.log(filePath);
-  // console.log(surveyedFile);
-  writeTestFile(surveyedFile);
+  const testContent = prepareTestContent(surveyedFile);
 };
 
 export default generateTests;
