@@ -3,7 +3,11 @@ import parseImportStatement, {
   ParsedImportStatement,
 } from "../parsing/parseImportStatement";
 
-const parseFileContent = (fileContent: string) => {
+export type SurveyedFile = {
+  imports: ParsedImportStatement[];
+};
+
+const parseFileContent = (fileContent: string): SurveyedFile => {
   const imports: ParsedImportStatement[] = [];
   const exportStatements: string[] = [];
   const variableStatements: string[] = [];

@@ -1,13 +1,11 @@
 // TODO: Give labels to groups in regex
 // import ${defaultImport}${namedImports} from ${source};
 
-export type ParsedImportStatement =
-  | {
-      defaultImport: string | undefined;
-      namedImports: string[];
-      source: any;
-    }
-  | undefined;
+export type ParsedImportStatement = {
+  defaultImport?: string;
+  namedImports: string[];
+  source: string;
+};
 
 // Accepts an import statement and returns an object with the default import, named imports and source
 // TODO: ignore commented import statements
@@ -25,6 +23,7 @@ const parseImportStatement = (
   // TODO: Give labels to groups in regex
   const regex = /import ((\* as )?.+?)?({.+?})? from "(.+?)"/gs;
 
+  // TODO: Implement without loop?
   while ((m = regex.exec(cleanImportStatement)) !== null) {
     // This is necessary to avoid infinite loops with zero-width matches
     if (m.index === regex.lastIndex) {
@@ -66,6 +65,8 @@ const parseImportStatement = (
       source,
     };
   }
+
+  throw new Error("Failed regex match in parseImportStatement");
 };
 
 export default parseImportStatement;
