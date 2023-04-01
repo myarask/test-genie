@@ -3,8 +3,11 @@ import { SurveyedFile } from "../surveying/surveyFile";
 const prepareTestContent = async (surveyedFile: SurveyedFile) => {
   console.log(surveyedFile);
 
-  const importStatements = surveyedFile.imports
-    .filter(({ source }) => source !== "react")
+  const copiedImports = surveyedFile.imports.filter(({ source }) => {
+    return source !== "react";
+  });
+
+  const importStatements = copiedImports
     .map((importStatement) => {
       // TODO: Implement without if statements
       if (
@@ -23,9 +26,18 @@ const prepareTestContent = async (surveyedFile: SurveyedFile) => {
           importStatement.source
         }";`;
       }
-    });
+    })
+    .join("\n");
 
-  let testContent = importStatements.join("\n");
+  const mockedModules = copiedImports
+    .map((importStatement) => {
+      return `jest.mock("${importStatement.source}");`;
+    })
+    .join("\n");
+
+  console.log({ importStatements, mockedModules });
+
+  let testContent = [importStatements, mockedModules].join("\n");
 
   return testContent;
 };
