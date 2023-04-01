@@ -12,4 +12,4 @@ const ResponsiveLink = (props: ResponsiveLinkProps) => {
   return <Link {...props} />;
 };
 
-export default ResponsiveLink;
+export { ResponsiveLink };

@@ -7,6 +7,7 @@ const prepareTestContent = (surveyedFile: SurveyedFile) => {
     return source !== "react";
   });
 
+  // Copy most import statements from the application file
   const importStatements = copiedImports
     .map((importStatement) => {
       // TODO: Implement without if statements?
@@ -29,6 +30,9 @@ const prepareTestContent = (surveyedFile: SurveyedFile) => {
     })
     .join("\n");
 
+  // TODO: Import tested components
+
+  // Mock most imported modules
   // TODO: Implement without if statements?
   let mockedModules = copiedImports
     .map((importStatement) => {
@@ -41,6 +45,8 @@ const prepareTestContent = (surveyedFile: SurveyedFile) => {
   let testContent = [importStatements, mockedModules]
     .filter(Boolean)
     .join("\n");
+
+  // TODO: Draft 1 test suites per exported component
 
   return testContent;
 };

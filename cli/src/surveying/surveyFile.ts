@@ -3,14 +3,23 @@ import parseImportStatement, {
   ParsedImportStatement,
 } from "../parsing/parseImportStatement";
 
+export type Exports = {
+  default: string | null;
+  named: string[];
+};
+
 export type SurveyedFile = {
   imports: ParsedImportStatement[];
+  exports: Exports;
 };
 
 const parseFileContent = (fileContent: string): SurveyedFile => {
   const imports: ParsedImportStatement[] = [];
-  const exportStatements: string[] = [];
   const variableStatements: string[] = [];
+  const exports: Exports = {
+    default: null,
+    named: [],
+  };
 
   const sourceFile = ts.createSourceFile(
     "temp.ts",
@@ -27,23 +36,39 @@ const parseFileContent = (fileContent: string): SurveyedFile => {
 
       imports.push(parsedImport);
     } else if (ts.isExportDeclaration(node)) {
-      // Collect export statements
-      exportStatements.push(fileContent.slice(node.pos, node.end));
-    } else if (ts.isExportAssignment(node)) {
-      // Collect named exports
-      exportStatements.push(fileContent.slice(node.pos, node.end));
+      // Ex: export { a, b, c };
 
-      // TODO: Seperate default exports from named exports
+      // TODO: Accomplish without string manipulation?
+      const exportStatement =
+        node.exportClause
+          ?.getText()
+          .replace("{", "")
+          .replace("}", "")
+          .split(",")
+          .map((declaration) => declaration.trim()) ?? [];
+
+      exports.named.push(...exportStatement);
+
+      console.log({ exportStatement });
+    } else if (ts.isExportAssignment(node)) {
+      // Ex: export default a;
+
+      exports.default = node.expression.getText();
     } else if (ts.isVariableStatement(node)) {
       variableStatements.push(fileContent.slice(node.pos, node.end));
-      // Collect exported variables
+
+      // Get name of variable
+      const variableName = node.declarationList.declarations[0].name.getText();
+
+      // Check if variable is exported
       if (node.modifiers) {
         const isExported = node.modifiers.some(
           (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword
         );
 
         if (isExported) {
-          exportStatements.push(fileContent.slice(node.pos, node.end));
+          // Ex: export const a = 1;
+          exports.named.push(variableName);
         }
       }
     }
@@ -55,7 +80,7 @@ const parseFileContent = (fileContent: string): SurveyedFile => {
 
   return {
     imports,
-    // exportStatements, // TODO: Parse export statements
+    exports,
     // variableStatements, // TODO: Parse variable statements
   };
 };
