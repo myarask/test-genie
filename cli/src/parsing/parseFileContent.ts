@@ -18,11 +18,7 @@ const parseFileContent = (fileContent: string) => {
   const visit = (node: ts.Node) => {
     if (ts.isImportDeclaration(node)) {
       // Collect import statements
-      const importStatement = fileContent
-        .slice(node.pos, node.end)
-        .replaceAll("\n", " ")
-        .trim();
-
+      const importStatement = fileContent.slice(node.pos, node.end);
       const parsedImport = parseImportStatement(importStatement);
 
       imports.push(parsedImport);

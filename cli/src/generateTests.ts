@@ -12,7 +12,7 @@ const generateTests = async (filePath: string) => {
 
   const parsedFileContent = parseFileContent(fileContent);
 
-  console.log(filePath);
+  // console.log(filePath);
   console.log(parsedFileContent);
 };
 

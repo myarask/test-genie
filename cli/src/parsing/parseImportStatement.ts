@@ -1,6 +1,5 @@
 // TODO: Give labels to groups in regex
 // import ${defaultImport}${namedImports} from ${source};
-const regex = /import ((\* as )?.+?)?({.+?})? from "(.+?)"/gs;
 
 export type ParsedImportStatement =
   | {
@@ -17,9 +16,16 @@ const parseImportStatement = (
 ): ParsedImportStatement => {
   let m;
 
-  console.log(importStatement);
+  // Remove comments from import statement
+  const cleanImportStatement = importStatement
+    .replaceAll(/\/\/.+?\n/gs, "")
+    .trim();
 
-  while ((m = regex.exec(importStatement)) !== null) {
+  // Not sure why this regex needs to be scoped to the function, but it does
+  // TODO: Give labels to groups in regex
+  const regex = /import ((\* as )?.+?)?({.+?})? from "(.+?)"/gs;
+
+  while ((m = regex.exec(cleanImportStatement)) !== null) {
     // This is necessary to avoid infinite loops with zero-width matches
     if (m.index === regex.lastIndex) {
       regex.lastIndex++;
