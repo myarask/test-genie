@@ -1,6 +1,6 @@
 import { SurveyedFile } from "../surveying/surveyFile";
 
-const prepareTestContent = async (surveyedFile: SurveyedFile) => {
+const prepareTestContent = (surveyedFile: SurveyedFile) => {
   console.log(surveyedFile);
 
   const copiedImports = surveyedFile.imports.filter(({ source }) => {
@@ -9,7 +9,7 @@ const prepareTestContent = async (surveyedFile: SurveyedFile) => {
 
   const importStatements = copiedImports
     .map((importStatement) => {
-      // TODO: Implement without if statements
+      // TODO: Implement without if statements?
       if (
         importStatement.defaultImport &&
         importStatement?.namedImports.length
@@ -37,8 +37,6 @@ const prepareTestContent = async (surveyedFile: SurveyedFile) => {
     .join("\n");
 
   if (mockedModules) mockedModules = "\n" + mockedModules;
-
-  console.log({ importStatements, mockedModules });
 
   let testContent = [importStatements, mockedModules]
     .filter(Boolean)
