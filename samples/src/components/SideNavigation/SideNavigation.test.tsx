@@ -4,6 +4,7 @@ import { CircularProgress, Box, Button } from "@mui/material";
 import ErrorMessage from "../ErrorMessage";
 import { usePermissions, useEntitlements, useFeatureFlags, useOnboarding } from "../../hooks";
 import { useKillerApp } from "./useKillerApp";
+import SideNavigation from "./SideNavigation";
 
 jest.mock("@auth0/auth0-react");
 jest.mock("react-router-dom");

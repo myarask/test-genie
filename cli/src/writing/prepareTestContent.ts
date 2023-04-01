@@ -1,6 +1,6 @@
 import { SurveyedFile } from "../surveying/surveyFile";
 
-const prepareTestContent = (surveyedFile: SurveyedFile) => {
+const prepareTestContent = (surveyedFile: SurveyedFile, filePath: string) => {
   console.log(surveyedFile);
 
   const copiedImports = surveyedFile.imports.filter(({ source }) => {
@@ -30,7 +30,18 @@ const prepareTestContent = (surveyedFile: SurveyedFile) => {
     })
     .join("\n");
 
-  // TODO: Import tested components
+  // Import target functions from application file
+  const target = filePath.split("/").pop()?.split(".")[0];
+  const defaultTarget = surveyedFile.exports.default;
+  const namedTargets = surveyedFile.exports.named.join(", ");
+  const targetContent = [
+    defaultTarget,
+    namedTargets ? `{ ${namedTargets} }` : "",
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  const importTargets = `import ${targetContent} from "./${target}";`;
 
   // Mock most imported modules
   // TODO: Implement without if statements?
@@ -42,7 +53,7 @@ const prepareTestContent = (surveyedFile: SurveyedFile) => {
 
   if (mockedModules) mockedModules = "\n" + mockedModules;
 
-  let testContent = [importStatements, mockedModules]
+  let testContent = [importStatements, importTargets, mockedModules]
     .filter(Boolean)
     .join("\n");
 

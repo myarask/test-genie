@@ -13,7 +13,7 @@ const generateTests = async (filePath: string) => {
   if (isBarrelFile(fileContent)) return;
 
   const surveyedFile = surveyFile(fileContent);
-  const testContent = await prepareTestContent(surveyedFile);
+  const testContent = prepareTestContent(surveyedFile, filePath);
   writeTestFile(filePath, testContent);
 };
 
