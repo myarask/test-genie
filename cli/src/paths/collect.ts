@@ -1,6 +1,6 @@
 import { glob } from "glob";
 
-export const getFilePaths = () => {
+export const collect = () => {
   const globs = process.argv.slice(2);
 
   return glob(globs, {
