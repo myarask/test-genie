@@ -1,6 +1,6 @@
 import ts from "typescript";
 import isBarrelFile from "./scanning/isBarrelFile";
-import parseFileContent from "./parsing/parseFileContent";
+import surveyFile from "./surveying/surveyFile";
 
 const generateTests = async (filePath: string) => {
   const fileContent = ts.sys.readFile(filePath);
@@ -10,10 +10,10 @@ const generateTests = async (filePath: string) => {
   // TODO: Do not scan files twice
   if (isBarrelFile(fileContent)) return;
 
-  const parsedFileContent = parseFileContent(fileContent);
+  const surveyedFile = surveyFile(fileContent);
 
   // console.log(filePath);
-  console.log(parsedFileContent);
+  console.log(surveyedFile);
 };
 
 export default generateTests;

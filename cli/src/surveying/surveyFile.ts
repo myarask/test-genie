@@ -1,7 +1,7 @@
 import * as ts from "typescript";
 import parseImportStatement, {
   ParsedImportStatement,
-} from "./parseImportStatement";
+} from "../parsing/parseImportStatement";
 
 const parseFileContent = (fileContent: string) => {
   const imports: ParsedImportStatement[] = [];
