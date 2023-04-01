@@ -3,27 +3,27 @@ import { glob } from "glob";
 export const getFilePaths = () => {
   const globs = process.argv.slice(2);
 
-  // Only process JS and TS files
-  const globsWithExtensions = globs.map((glob) => {
-    if (glob.endsWith(".ts")) return glob;
-    if (glob.endsWith(".tsx")) return glob;
-    if (glob.endsWith(".js")) return glob;
-    if (glob.endsWith(".jsx")) return glob;
-    if (glob.endsWith("**")) return `${glob}/*.{ts,tsx,js,jsx}`;
-    if (glob.endsWith("*")) return `${glob}.{ts,tsx,js,jsx}`;
-
-    throw new Error("Can only match with .js, .jsx, .ts, .tsx, * or **");
-  });
-
-  // TODO: Use ignore options instead of deriving globsWithExtensions
-  return glob(globsWithExtensions, {
+  return glob(globs, {
     nodir: true,
-    ignore: [
-      "node_modules/**",
-      "{dist,build}/**",
-      "**/*.{spec,test}.*",
-      "**/*.d.ts",
-    ],
+    ignore: {
+      ignored: (p) => {
+        // Ignore node_modules
+        if (p.name === "node_modules") return true;
+
+        // Ignore dist and build folders
+        if (p.name === "dist" || p.name === "build") return true;
+
+        // Ignore .d.ts files
+        if (p.name.endsWith(".d.ts")) return true;
+
+        // Only test Typescript and Javscript files
+        const isJSorTS = /\.(jsx?|tsx?)$/.test(p.name);
+        if (!isJSorTS) return true;
+
+        // Do not test test files
+        return /\.(test|spec)\.(jsx?|tsx?)$/.test(p.name);
+      },
+    },
     signal: AbortSignal.timeout(1000),
     maxDepth: 10,
   });

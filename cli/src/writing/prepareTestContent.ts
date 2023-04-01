@@ -29,15 +29,20 @@ const prepareTestContent = async (surveyedFile: SurveyedFile) => {
     })
     .join("\n");
 
-  const mockedModules = copiedImports
+  // TODO: Implement without if statements?
+  let mockedModules = copiedImports
     .map((importStatement) => {
       return `jest.mock("${importStatement.source}");`;
     })
     .join("\n");
 
+  if (mockedModules) mockedModules = "\n" + mockedModules;
+
   console.log({ importStatements, mockedModules });
 
-  let testContent = [importStatements, mockedModules].join("\n");
+  let testContent = [importStatements, mockedModules]
+    .filter(Boolean)
+    .join("\n");
 
   return testContent;
 };

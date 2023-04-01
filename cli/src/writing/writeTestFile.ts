@@ -3,6 +3,7 @@ import ts from "typescript";
 
 const writeTestFile = (filePath: string, testContent: string) => {
   // This file does not need a test file
+
   if (!testContent) return;
 
   const fileExt = path.extname(filePath);
