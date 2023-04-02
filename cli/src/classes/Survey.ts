@@ -40,11 +40,9 @@ class Survey {
   }
 
   getDefaultExport() {
-    const exportAssignment = this.sourceFile.statements.find(
-      ts.isExportAssignment
-    ) as ts.ExportAssignment;
-
-    return exportAssignment?.expression.getText();
+    return this.sourceFile.statements
+      .find(ts.isExportAssignment)
+      ?.expression.getText();
   }
 }
 
