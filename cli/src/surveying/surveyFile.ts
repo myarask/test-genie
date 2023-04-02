@@ -12,22 +12,24 @@ export type SurveyedFile = {
   imports: ParsedImportStatement[];
   exports: Exports;
   functionalComponents: Record<string, any>;
+  hooks: Record<string, any>;
 };
 
 const parseFileContent = (fileContent: string): SurveyedFile => {
   const imports: ParsedImportStatement[] = [];
-  const variableStatements: string[] = [];
   const exports: Exports = {
     default: null,
     named: [],
   };
   const functionalComponents: Record<string, any> = {};
+  const hooks: Record<string, any> = {};
 
   const sourceFile = ts.createSourceFile(
     "temp.ts",
     fileContent,
     ts.ScriptTarget.Latest,
-    true
+    true,
+    ts.ScriptKind.TSX
   );
 
   const visit = (node: ts.Node) => {
@@ -55,14 +57,23 @@ const parseFileContent = (fileContent: string): SurveyedFile => {
 
       exports.default = node.expression.getText();
     } else if (ts.isVariableStatement(node)) {
-      variableStatements.push(fileContent.slice(node.pos, node.end));
-
       // Get name of variable
       const variableName = node.declarationList.declarations[0].name.getText();
 
-      // Get variable type
-      const variableType = node.declarationList.declarations[0].type?.getText();
-      console.log({ variableName, variableType });
+      // Determine the category of the variable. Ex: functional component, hook, variable, etc.
+      // TODO: Improve detection of functional components and hooks
+      const text = node.getText();
+      const containsJSX = /<[a-zA-Z][a-zA-Z0-9]*(.+)? ?\/?>/.test(text);
+      const containsFatArrow = text.includes("=>");
+      const containsUse = text.includes("const use");
+
+      if (containsJSX) {
+        // Functional Component
+        functionalComponents[variableName] = {};
+      } else if (containsUse && containsFatArrow) {
+        // Hook
+        hooks[variableName] = {};
+      }
 
       // Check if variable is exported
       if (node.modifiers) {
@@ -77,6 +88,7 @@ const parseFileContent = (fileContent: string): SurveyedFile => {
       }
     }
 
+    // TODO: Remove? May only have to visit the direct children of the source file
     ts.forEachChild(node, visit);
   };
 
@@ -86,7 +98,7 @@ const parseFileContent = (fileContent: string): SurveyedFile => {
     imports,
     exports,
     functionalComponents,
-    // variableStatements, // TODO: Parse variable statements
+    hooks,
   };
 };
 

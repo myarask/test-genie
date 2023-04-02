@@ -12,3 +12,5 @@ jest.mock("@mui/material");
 jest.mock("../ErrorMessage");
 jest.mock("../../hooks");
 jest.mock("./useKillerApp");
+
+describe("SideNavigation", () => {});

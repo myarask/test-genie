@@ -53,13 +53,22 @@ const prepareTestContent = (surveyedFile: SurveyedFile, filePath: string) => {
 
   if (mockedModules) mockedModules = "\n" + mockedModules;
 
-  let testContent = [importStatements, importTargets, mockedModules]
-    .filter(Boolean)
+  // Draft 1 test suite per exported functional component
+  let FCSuites = Object.keys(surveyedFile.functionalComponents)
+    .map((key) => {
+      return `\ndescribe("${key}", () => {});`;
+    })
     .join("\n");
 
-  // TODO: Draft 1 test suites per exported component
+  let hookSuites = Object.keys(surveyedFile.hooks)
+    .map((key) => {
+      return `\ndescribe("${key}", () => {});`;
+    })
+    .join("\n");
 
-  return testContent;
+  return [importStatements, importTargets, mockedModules, FCSuites, hookSuites]
+    .filter(Boolean)
+    .join("\n");
 };
 
 export default prepareTestContent;
