@@ -47,6 +47,35 @@ class Survey {
       .find(ts.isExportAssignment)
       ?.expression.getText();
   }
+
+  getFCs() {
+    // Return an array of functional component names
+    return this.sourceFile.statements
+      .filter(ts.isVariableStatement)
+      .filter((variable) => {
+        // Check if variable name starts with a capital letter
+        const variableName =
+          variable.declarationList.declarations[0].name.getText();
+        return variableName[0] === variableName[0].toUpperCase();
+      })
+      .map((variable) =>
+        variable.declarationList.declarations[0].name.getText()
+      );
+  }
+
+  getHooks() {
+    return this.sourceFile.statements
+      .filter(ts.isVariableStatement)
+      .filter((variable) => {
+        // Check if variable name starts with "use"
+        const variableName =
+          variable.declarationList.declarations[0].name.getText();
+        return variableName.slice(0, 3) === "use";
+      })
+      .map((variable) =>
+        variable.declarationList.declarations[0].name.getText()
+      );
+  }
 }
 
 export default Survey;
