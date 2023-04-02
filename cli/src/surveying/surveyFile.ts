@@ -11,6 +11,7 @@ export type Exports = {
 export type SurveyedFile = {
   imports: ParsedImportStatement[];
   exports: Exports;
+  functionalComponents: Record<string, any>;
 };
 
 const parseFileContent = (fileContent: string): SurveyedFile => {
@@ -20,6 +21,7 @@ const parseFileContent = (fileContent: string): SurveyedFile => {
     default: null,
     named: [],
   };
+  const functionalComponents: Record<string, any> = {};
 
   const sourceFile = ts.createSourceFile(
     "temp.ts",
@@ -48,8 +50,6 @@ const parseFileContent = (fileContent: string): SurveyedFile => {
           .map((declaration) => declaration.trim()) ?? [];
 
       exports.named.push(...exportStatement);
-
-      console.log({ exportStatement });
     } else if (ts.isExportAssignment(node)) {
       // Ex: export default a;
 
@@ -59,6 +59,10 @@ const parseFileContent = (fileContent: string): SurveyedFile => {
 
       // Get name of variable
       const variableName = node.declarationList.declarations[0].name.getText();
+
+      // Get variable type
+      const variableType = node.declarationList.declarations[0].type?.getText();
+      console.log({ variableName, variableType });
 
       // Check if variable is exported
       if (node.modifiers) {
@@ -81,6 +85,7 @@ const parseFileContent = (fileContent: string): SurveyedFile => {
   return {
     imports,
     exports,
+    functionalComponents,
     // variableStatements, // TODO: Parse variable statements
   };
 };
