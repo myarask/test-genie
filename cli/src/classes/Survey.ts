@@ -48,8 +48,36 @@ class Survey {
       ?.expression.getText();
   }
 
+  getNamedExports() {
+    const exportDeclarationNames = this.sourceFile.statements
+      .filter(ts.isExportDeclaration)
+      .map(
+        ({ exportClause }) =>
+          exportClause
+            ?.getText()
+            .replace("{", "")
+            .replace("}", "")
+            .split(",")
+            .map((declaration) => declaration.trim()) ?? []
+      )
+      .flat();
+
+    const variableAssignmentNames = this.sourceFile.statements
+      .filter(ts.isVariableStatement)
+      .filter((statement) => {
+        return statement.modifiers?.some(
+          (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword
+        );
+      })
+      .map((statement) => {
+        return statement.declarationList.declarations[0].name.getText();
+      })
+      .flat();
+
+    return [...exportDeclarationNames, ...variableAssignmentNames];
+  }
+
   getFCs() {
-    // Return an array of functional component names
     return this.sourceFile.statements
       .filter(ts.isVariableStatement)
       .filter((variable) => {

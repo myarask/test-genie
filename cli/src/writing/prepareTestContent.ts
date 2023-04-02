@@ -1,7 +1,7 @@
 import { SurveyedFile } from "../surveying/surveyFile";
 
 const prepareTestContent = (surveyedFile: SurveyedFile, filePath: string) => {
-  console.log(surveyedFile);
+  // console.log(surveyedFile);
 
   const copiedImports = surveyedFile.imports.filter(({ source }) => {
     return source !== "react";
