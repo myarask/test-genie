@@ -34,8 +34,11 @@ class Survey {
   }
 
   isBarrelFile() {
-    return this.lines.every(
-      (line) => line.startsWith("import") || line.startsWith("export")
+    return this.sourceFile.statements.every(
+      (statement) =>
+        ts.isImportDeclaration(statement) ||
+        ts.isExportDeclaration(statement) ||
+        ts.isExportAssignment(statement)
     );
   }
 
