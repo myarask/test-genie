@@ -38,6 +38,14 @@ class Survey {
       (line) => line.startsWith("import") || line.startsWith("export")
     );
   }
+
+  getDefaultExport() {
+    const exportAssignment = this.sourceFile.statements.find(
+      ts.isExportAssignment
+    ) as ts.ExportAssignment;
+
+    return exportAssignment?.expression.getText();
+  }
 }
 
 export default Survey;
