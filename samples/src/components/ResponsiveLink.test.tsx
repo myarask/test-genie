@@ -3,4 +3,7 @@ import { ResponsiveLink } from "./ResponsiveLink";
 
 jest.mock("react-router-dom");
 
-describe("ResponsiveLink", () => {});
+describe("ResponsiveLink", () => {
+  beforeAll(() => {
+  });
+});

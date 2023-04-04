@@ -1,5 +1,5 @@
 import * as ts from "typescript";
-import { Variable } from "./Variable";
+import { FC, Hook, Variable } from "./Variable";
 
 class Survey {
   lines: string[];
@@ -91,7 +91,7 @@ class Survey {
       .filter(ts.isVariableStatement)
       .map((statement) => new Variable(statement))
       .filter((statement) => statement.getClassification() === "FC")
-      .map((statement) => ({ name: statement.getName() }));
+      .map((statement) => new FC(statement.getNode()));
   }
 
   getHooks() {
@@ -100,7 +100,7 @@ class Survey {
       .filter(ts.isVariableStatement)
       .map((statement) => new Variable(statement))
       .filter((statement) => statement.getClassification() === "hook")
-      .map((statement) => ({ name: statement.getName() }));
+      .map((statement) => new Hook(statement.getNode()));
   }
 }
 

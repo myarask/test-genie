@@ -13,4 +13,13 @@ jest.mock("../ErrorMessage");
 jest.mock("../../hooks");
 jest.mock("./useKillerApp");
 
-describe("SideNavigation", () => {});
+describe("SideNavigation", () => {
+  beforeAll(() => {
+    (usePermissions as jest.Mock).mockReturnValue({});
+    (useEntitlements as jest.Mock).mockReturnValue({});
+    (useFeatureFlags as jest.Mock).mockReturnValue({});
+    (useKillerApp as jest.Mock).mockReturnValue({});
+    (useOnboarding as jest.Mock).mockReturnValue({});
+    (useAuth0 as jest.Mock).mockReturnValue({});
+  });
+});

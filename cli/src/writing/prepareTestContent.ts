@@ -33,14 +33,24 @@ const prepareTestContent = (survey: Survey, filePath: string) => {
   const FCSuites = survey
     .getFCs()
     .map((FC) => {
-      return `\ndescribe("${FC.name}", () => {});`;
+      // TODO: Clean up
+      let suite = "";
+      suite = `\ndescribe("${FC.getName()}", () => {`;
+      suite += "\n  beforeAll(() => {";
+      suite += FC.getHooks()
+        .map((hook) => `\n    (${hook.name} as jest.Mock).mockReturnValue({});`)
+        .join("");
+      suite += "\n  });";
+      suite += "\n});";
+
+      return suite;
     })
     .join("\n");
 
   const hookSuites = survey
     .getHooks()
     .map((hook) => {
-      return `\ndescribe("${hook.name}", () => {});`;
+      return `\ndescribe("${hook.getName()}", () => {});`;
     })
     .join("\n");
 
