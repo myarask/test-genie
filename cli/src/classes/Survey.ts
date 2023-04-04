@@ -1,4 +1,5 @@
 import * as ts from "typescript";
+import { Variable } from "./Variable";
 
 class Survey {
   lines: string[];
@@ -76,14 +77,9 @@ class Survey {
 
     const variableAssignmentNames = this.sourceFile.statements
       .filter(ts.isVariableStatement)
-      .filter((statement) => {
-        return statement.modifiers?.some(
-          (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword
-        );
-      })
-      .map((statement) => {
-        return statement.declarationList.declarations[0].name.getText();
-      })
+      .map((statement) => new Variable(statement))
+      .filter((statement) => statement.isExported())
+      .map((statement) => statement.getName())
       .flat();
 
     return [...exportDeclarationNames, ...variableAssignmentNames];
@@ -93,32 +89,18 @@ class Survey {
     // TODO: Return array of objects
     return this.sourceFile.statements
       .filter(ts.isVariableStatement)
-      .filter((statement) => {
-        // Check if variable name starts with a capital letter
-        const variableName =
-          statement.declarationList.declarations[0].name.getText();
-        return variableName[0] === variableName[0].toUpperCase();
-      })
-      .map((statement) => ({
-        name: statement.declarationList.declarations[0].name.getText(),
-      }));
+      .map((statement) => new Variable(statement))
+      .filter((statement) => statement.getClassification() === "FC")
+      .map((statement) => ({ name: statement.getName() }));
   }
 
   getHooks() {
     // TODO: Return array of objects
     return this.sourceFile.statements
       .filter(ts.isVariableStatement)
-      .filter((variable) => {
-        // Check if variable name starts with "use"
-        const variableName =
-          variable.declarationList.declarations[0].name.getText();
-        return variableName.slice(0, 3) === "use";
-      })
-      .map((variable) => {
-        return {
-          name: variable.declarationList.declarations[0].name.getText(),
-        };
-      });
+      .map((statement) => new Variable(statement))
+      .filter((statement) => statement.getClassification() === "hook")
+      .map((statement) => ({ name: statement.getName() }));
   }
 }
 
