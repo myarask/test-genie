@@ -1,6 +1,5 @@
 import ts from "typescript";
 import Survey from "./classes/Survey";
-import surveyFile from "./surveying/surveyFile";
 import prepareTestContent from "./writing/prepareTestContent";
 import writeTestFile from "./writing/writeTestFile";
 
@@ -18,12 +17,10 @@ const generateTests = async (filePath: string) => {
     namedExports: survey.getNamedExports(),
     defaultExport: survey.getDefaultExport(),
     FCs: survey.getFCs(),
-
     hooks: survey.getHooks(),
   });
 
-  const surveyedFile = surveyFile(fileContent);
-  const testContent = prepareTestContent(surveyedFile, filePath);
+  const testContent = prepareTestContent(survey, filePath);
   writeTestFile(filePath, testContent);
 };
 

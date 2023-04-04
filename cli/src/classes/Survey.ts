@@ -42,6 +42,18 @@ class Survey {
     );
   }
 
+  getImportDeclarations() {
+    return this.sourceFile.statements
+      .filter(ts.isImportDeclaration)
+      .filter(
+        (statement) =>
+          statement.moduleSpecifier
+            .getText()
+            .replaceAll("'", "")
+            .replaceAll('"', "") !== "react"
+      );
+  }
+
   getDefaultExport() {
     return this.sourceFile.statements
       .find(ts.isExportAssignment)
@@ -78,20 +90,22 @@ class Survey {
   }
 
   getFCs() {
+    // TODO: Return array of objects
     return this.sourceFile.statements
       .filter(ts.isVariableStatement)
-      .filter((variable) => {
+      .filter((statement) => {
         // Check if variable name starts with a capital letter
         const variableName =
-          variable.declarationList.declarations[0].name.getText();
+          statement.declarationList.declarations[0].name.getText();
         return variableName[0] === variableName[0].toUpperCase();
       })
-      .map((variable) =>
-        variable.declarationList.declarations[0].name.getText()
-      );
+      .map((statement) => ({
+        name: statement.declarationList.declarations[0].name.getText(),
+      }));
   }
 
   getHooks() {
+    // TODO: Return array of objects
     return this.sourceFile.statements
       .filter(ts.isVariableStatement)
       .filter((variable) => {
@@ -100,9 +114,11 @@ class Survey {
           variable.declarationList.declarations[0].name.getText();
         return variableName.slice(0, 3) === "use";
       })
-      .map((variable) =>
-        variable.declarationList.declarations[0].name.getText()
-      );
+      .map((variable) => {
+        return {
+          name: variable.declarationList.declarations[0].name.getText(),
+        };
+      });
   }
 }
 
