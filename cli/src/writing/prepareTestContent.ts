@@ -33,14 +33,32 @@ const prepareTestContent = (survey: Survey, filePath: string) => {
   const FCSuites = survey
     .getFCs()
     .map((FC) => {
+      let mockAll = "";
+      mockAll += "\n  beforeAll(() => {";
+      mockAll += FC.getHooks()
+        .map((hook) => `\n    (${hook.name} as jest.Mock).mockReturnValue({});`)
+        .join("");
+      mockAll += "\n  });";
+
+      let testInteractiveElements = "";
+      const interactiveElements = FC.getInteractiveElements();
+
+      for (let interactiveElement of interactiveElements) {
+        testInteractiveElements += "\n";
+        testInteractiveElements += `\n  test("[When] the ${interactiveElement.children} ${interactiveElement.role} is clicked [Then] ...", () => {`;
+        testInteractiveElements += `\n    render(<${FC.getName()} />);`;
+        testInteractiveElements += `\n    const element = screen.getByText("${interactiveElement.children}");`; // TODO: getByRole instead
+        testInteractiveElements += `\n    expect(element).toBeInTheDocument();`;
+        testInteractiveElements += `\n    userEvent.click(element);`;
+        testInteractiveElements += `\n    expect(${interactiveElement.effect}).toBeCalled();`;
+        testInteractiveElements += "\n  })";
+      }
+
       // TODO: Clean up
       let suite = "";
       suite = `\ndescribe("${FC.getName()}", () => {`;
-      suite += "\n  beforeAll(() => {";
-      suite += FC.getHooks()
-        .map((hook) => `\n    (${hook.name} as jest.Mock).mockReturnValue({});`)
-        .join("");
-      suite += "\n  });";
+      suite += mockAll;
+      suite += testInteractiveElements;
       suite += "\n});";
 
       return suite;

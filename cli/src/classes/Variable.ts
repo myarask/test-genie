@@ -34,11 +34,12 @@ export class Variable {
 
 export class ReactiveFunction extends Variable {
   getHooks() {
-    const regex = /const (.+) = (use.+)\(\)/g;
+    const regex = /(const|var|let) (.+) = (use.+)\(\)/g;
     const text = this.node.getText();
     let m;
 
     const hooks: {
+      statement: "const" | "var" | "let";
       text: string;
       output: string;
       name: string;
@@ -51,9 +52,10 @@ export class ReactiveFunction extends Variable {
       }
 
       hooks.push({
-        text: m[0],
-        output: m[1],
-        name: m[2],
+        statement: m[0],
+        text: m[1],
+        output: m[2],
+        name: m[3],
       });
     }
 
@@ -63,4 +65,37 @@ export class ReactiveFunction extends Variable {
 
 export class Hook extends ReactiveFunction {}
 
-export class FC extends ReactiveFunction {}
+export class FC extends ReactiveFunction {
+  getInteractiveElements() {
+    const regex =
+      /<(.+)(?: .+)? (onClick)={(.+)}(?: .+)?>\n?(.+)\n?( *)<\/.+>/g;
+    let m;
+
+    const interactiveElements: {
+      text: string;
+      element: string;
+      event: "onClick" | "onFocus" | "onBlur" | "onMouseEnter" | "onMouseLeave";
+      role: "button" | "link" | "input" | "select" | "textarea";
+      children: string;
+      effect: string;
+    }[] = [];
+
+    while ((m = regex.exec(this.node.getText())) !== null) {
+      // This is necessary to avoid infinite loops with zero-width matches
+      if (m.index === regex.lastIndex) {
+        regex.lastIndex++;
+      }
+
+      interactiveElements.push({
+        text: m[0],
+        element: m[1],
+        event: m[2],
+        effect: m[3],
+        children: m[4].trim(),
+        role: "button", // TODO: Implement role detection
+      });
+    }
+
+    return interactiveElements;
+  }
+}

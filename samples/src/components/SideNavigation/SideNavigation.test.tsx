@@ -22,4 +22,28 @@ describe("SideNavigation", () => {
     (useOnboarding as jest.Mock).mockReturnValue({});
     (useAuth0 as jest.Mock).mockReturnValue({});
   });
+
+  test("[When] the Login button is clicked [Then] ...", () => {
+    render(<SideNavigation />);
+    const element = screen.getByText("Login");
+    expect(element).toBeInTheDocument();
+    userEvent.click(element);
+    expect(() => auth0.loginWithRedirect()).toBeCalled();
+  })
+
+  test("[When] the Expand/Collapse button is clicked [Then] ...", () => {
+    render(<SideNavigation />);
+    const element = screen.getByText("Expand/Collapse");
+    expect(element).toBeInTheDocument();
+    userEvent.click(element);
+    expect(() => setIsExpanded(!isExpanded)).toBeCalled();
+  })
+
+  test("[When] the Launch Killer App button is clicked [Then] ...", () => {
+    render(<SideNavigation />);
+    const element = screen.getByText("Launch Killer App");
+    expect(element).toBeInTheDocument();
+    userEvent.click(element);
+    expect(killerApp.launch).toBeCalled();
+  })
 });
