@@ -3,6 +3,24 @@ import Survey from "../classes/Survey";
 const prepareTestContent = (survey: Survey, filePath: string) => {
   // console.log(surveyedFile);
 
+  let importTestTools = "";
+  if (survey.getFCs().length) {
+    // Import render and screen when there are functional components
+    importTestTools += `import { render, screen } from "@testing-library/react";\n`;
+  }
+
+  if (
+    survey
+      .getFCs()
+      .map((FC) => FC.getInteractiveElements())
+      .flat().length
+  ) {
+    // Import userEvent when there are interactive elements
+    importTestTools += `import userEvent from "@testing-library/user-event";\n`;
+  }
+
+  importTestTools = importTestTools.trim();
+
   const importStatements = survey
     .getImportDeclarations()
     .map((statement) => statement.getText())
@@ -51,7 +69,7 @@ const prepareTestContent = (survey: Survey, filePath: string) => {
         testInteractiveElements += `\n    expect(element).toBeInTheDocument();`;
         testInteractiveElements += `\n    userEvent.click(element);`;
         testInteractiveElements += `\n    expect(${interactiveElement.effect}).toBeCalled();`;
-        testInteractiveElements += "\n  })";
+        testInteractiveElements += "\n  });";
       }
 
       // TODO: Clean up
@@ -72,7 +90,14 @@ const prepareTestContent = (survey: Survey, filePath: string) => {
     })
     .join("\n");
 
-  return [importStatements, importTargets, mockedModules, FCSuites, hookSuites]
+  return [
+    importTestTools,
+    importStatements,
+    importTargets,
+    mockedModules,
+    FCSuites,
+    hookSuites,
+  ]
     .filter(Boolean)
     .join("\n");
 };

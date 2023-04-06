@@ -1,3 +1,5 @@
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Link } from "react-router-dom";
 import { CircularProgress, Box, Button } from "@mui/material";
@@ -29,7 +31,7 @@ describe("SideNavigation", () => {
     expect(element).toBeInTheDocument();
     userEvent.click(element);
     expect(() => auth0.loginWithRedirect()).toBeCalled();
-  })
+  });
 
   test("[When] the Expand/Collapse button is clicked [Then] ...", () => {
     render(<SideNavigation />);
@@ -37,7 +39,7 @@ describe("SideNavigation", () => {
     expect(element).toBeInTheDocument();
     userEvent.click(element);
     expect(() => setIsExpanded(!isExpanded)).toBeCalled();
-  })
+  });
 
   test("[When] the Launch Killer App button is clicked [Then] ...", () => {
     render(<SideNavigation />);
@@ -45,5 +47,5 @@ describe("SideNavigation", () => {
     expect(element).toBeInTheDocument();
     userEvent.click(element);
     expect(killerApp.launch).toBeCalled();
-  })
+  });
 });
