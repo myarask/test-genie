@@ -61,6 +61,21 @@ export class ReactiveFunction extends Variable {
 
     return hooks;
   }
+
+  getSources() {
+    // TODO: Implement. Not hardcode.
+    const sources = {
+      launch: {
+        killerApp: "useKillerApp",
+      },
+      loginWithRedirect: {
+        auth0: "useAuth0",
+      },
+      setIsExpanded: "props",
+    };
+
+    return sources;
+  }
 }
 
 export class Hook extends ReactiveFunction {}

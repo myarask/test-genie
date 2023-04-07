@@ -30,7 +30,6 @@ describe("SideNavigation", () => {
     const element = screen.getByText("Login");
     expect(element).toBeInTheDocument();
     userEvent.click(element);
-    expect(() => auth0.loginWithRedirect()).toBeCalled();
   });
 
   test("[When] the Expand/Collapse button is clicked [Then] ...", () => {
@@ -38,14 +37,15 @@ describe("SideNavigation", () => {
     const element = screen.getByText("Expand/Collapse");
     expect(element).toBeInTheDocument();
     userEvent.click(element);
-    expect(() => setIsExpanded(!isExpanded)).toBeCalled();
   });
 
   test("[When] the Launch Killer App button is clicked [Then] ...", () => {
+    const launch = jest.fn();
+    (useKillerApp as jest.Mock).mockReturnValueOnce({ launch });
     render(<SideNavigation />);
     const element = screen.getByText("Launch Killer App");
     expect(element).toBeInTheDocument();
     userEvent.click(element);
-    expect(killerApp.launch).toBeCalled();
+    expect(launch).toBeCalled();
   });
 });

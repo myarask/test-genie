@@ -51,6 +51,8 @@ const prepareTestContent = (survey: Survey, filePath: string) => {
   const FCSuites = survey
     .getFCs()
     .map((FC) => {
+      const sources = FC.getSources();
+
       let mockAll = "";
       mockAll += "\n  beforeAll(() => {";
       mockAll += FC.getHooks()
@@ -62,13 +64,43 @@ const prepareTestContent = (survey: Survey, filePath: string) => {
       const interactiveElements = FC.getInteractiveElements();
 
       for (let interactiveElement of interactiveElements) {
+        const hookMocks: {
+          hook: any;
+          functions: string[];
+        }[] = [];
+
+        console.log(interactiveElement.effect);
+
+        if (!interactiveElement.effect.includes("=>")) {
+          const chain = interactiveElement.effect.split(".").reverse();
+          let chainSource = sources;
+
+          // Find the hook that supplies the function
+          for (let key of chain) {
+            chainSource = chainSource[key];
+          }
+
+          hookMocks.push({
+            hook: chainSource,
+            functions: [interactiveElement.effect.split(".").slice(-1)[0]],
+          });
+        }
+
+        console.log(hookMocks);
+
         testInteractiveElements += "\n";
         testInteractiveElements += `\n  test("[When] the ${interactiveElement.children} ${interactiveElement.role} is clicked [Then] ...", () => {`;
+        for (let i = 0; i < hookMocks.length; i++) {
+          testInteractiveElements += `\n    const ${hookMocks[0].functions[0]} = jest.fn();`;
+          testInteractiveElements += `\n    (${hookMocks[0].hook} as jest.Mock).mockReturnValueOnce({ ${hookMocks[0].functions[0]} });`;
+        }
         testInteractiveElements += `\n    render(<${FC.getName()} />);`;
         testInteractiveElements += `\n    const element = screen.getByText("${interactiveElement.children}");`; // TODO: getByRole instead
         testInteractiveElements += `\n    expect(element).toBeInTheDocument();`;
         testInteractiveElements += `\n    userEvent.click(element);`;
-        testInteractiveElements += `\n    expect(${interactiveElement.effect}).toBeCalled();`;
+        for (let i = 0; i < hookMocks.length; i++) {
+          testInteractiveElements += `\n    expect(${hookMocks[0].functions[0]}).toBeCalled();`;
+        }
         testInteractiveElements += "\n  });";
       }
 
