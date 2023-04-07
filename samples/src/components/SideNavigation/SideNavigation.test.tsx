@@ -26,26 +26,28 @@ describe("SideNavigation", () => {
   });
 
   test("[When] the Login button is clicked [Then] ...", () => {
+    const loginWithRedirect = jest.fn();
+    (useAuth0 as jest.Mock).mockReturnValueOnce({ loginWithRedirect });
+
     render(<SideNavigation />);
-    const element = screen.getByText("Login");
-    expect(element).toBeInTheDocument();
-    userEvent.click(element);
+
+    userEvent.click(screen.getByText("Login"));
+    expect(loginWithRedirect).toBeCalled();
   });
 
   test("[When] the Expand/Collapse button is clicked [Then] ...", () => {
     render(<SideNavigation />);
-    const element = screen.getByText("Expand/Collapse");
-    expect(element).toBeInTheDocument();
-    userEvent.click(element);
+
+    userEvent.click(screen.getByText("Expand/Collapse"));
   });
 
   test("[When] the Launch Killer App button is clicked [Then] ...", () => {
     const launch = jest.fn();
     (useKillerApp as jest.Mock).mockReturnValueOnce({ launch });
+
     render(<SideNavigation />);
-    const element = screen.getByText("Launch Killer App");
-    expect(element).toBeInTheDocument();
-    userEvent.click(element);
+
+    userEvent.click(screen.getByText("Launch Killer App"));
     expect(launch).toBeCalled();
   });
 });

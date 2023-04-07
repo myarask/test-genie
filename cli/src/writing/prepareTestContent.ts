@@ -1,5 +1,23 @@
 import Survey from "../classes/Survey";
 
+const getEffectMock = (effect: string, sources: any) => {
+  const chain = effect.split(".").reverse();
+  let chainSource = sources;
+
+  // Find the source that supplies the function
+  for (let key of chain) {
+    chainSource = chainSource[key];
+  }
+
+  return {
+    type: (chainSource as unknown as string).startsWith("use")
+      ? "hook"
+      : "props",
+    hook: chainSource,
+    functions: [effect.split(".").slice(-1)[0]],
+  };
+};
+
 const prepareTestContent = (survey: Survey, filePath: string) => {
   // console.log(surveyedFile);
 
@@ -71,19 +89,40 @@ const prepareTestContent = (survey: Survey, filePath: string) => {
 
         console.log(interactiveElement.effect);
 
-        if (!interactiveElement.effect.includes("=>")) {
-          const chain = interactiveElement.effect.split(".").reverse();
-          let chainSource = sources;
+        if (interactiveElement.effect.includes("=>")) {
+          // Fat arrow function
 
-          // Find the hook that supplies the function
-          for (let key of chain) {
-            chainSource = chainSource[key];
+          const regex = /\(\)\s?=>\s(.+)\((.*)\)/g;
+          // Searches on the following examples:
+          // () => auth0.loginWithRedirect()
+          // () => setIsExpanded(!isExpanded)
+
+          let m;
+
+          while ((m = regex.exec(interactiveElement.effect)) !== null) {
+            // This is necessary to avoid infinite loops with zero-width matches
+            if (m.index === regex.lastIndex) {
+              regex.lastIndex++;
+            }
+
+            const [full, effect, args] = m;
+
+            if (!args) {
+              // Treat as drop-in function
+              const effectMock = getEffectMock(effect, sources);
+
+              if (effectMock.type === "hook") {
+                hookMocks.push(effectMock);
+              }
+            }
           }
+        } else {
+          // Drop-in function
+          const effectMock = getEffectMock(interactiveElement.effect, sources);
 
-          hookMocks.push({
-            hook: chainSource,
-            functions: [interactiveElement.effect.split(".").slice(-1)[0]],
-          });
+          if (effectMock.type === "hook") {
+            hookMocks.push(effectMock);
+          }
         }
 
         console.log(hookMocks);
@@ -93,11 +132,11 @@ const prepareTestContent = (survey: Survey, filePath: string) => {
         for (let i = 0; i < hookMocks.length; i++) {
           testInteractiveElements += `\n    const ${hookMocks[0].functions[0]} = jest.fn();`;
           testInteractiveElements += `\n    (${hookMocks[0].hook} as jest.Mock).mockReturnValueOnce({ ${hookMocks[0].functions[0]} });`;
+          testInteractiveElements += "\n";
         }
         testInteractiveElements += `\n    render(<${FC.getName()} />);`;
-        testInteractiveElements += `\n    const element = screen.getByText("${interactiveElement.children}");`; // TODO: getByRole instead
-        testInteractiveElements += `\n    expect(element).toBeInTheDocument();`;
-        testInteractiveElements += `\n    userEvent.click(element);`;
+        testInteractiveElements += "\n";
+        testInteractiveElements += `\n    userEvent.click(screen.getByText("${interactiveElement.children}"));`; // TODO: Query by role
         for (let i = 0; i < hookMocks.length; i++) {
           testInteractiveElements += `\n    expect(${hookMocks[0].functions[0]}).toBeCalled();`;
         }
