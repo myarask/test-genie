@@ -116,7 +116,12 @@ export class FC extends ReactiveFunction {
   }
 
   getTestSubjects() {
-    const subjects: {
+    const accessControl: {
+      expression: string;
+      conditions: string[];
+    }[] = [];
+
+    const userEvents: {
       tagName: string;
       propName: string;
       propValue: string | boolean;
@@ -130,6 +135,7 @@ export class FC extends ReactiveFunction {
     ) => {
       const newConditions: string[] = [];
 
+      // Check if there are any conditions on this node
       if (
         ts.isBinaryExpression(node) &&
         node.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken
@@ -138,11 +144,12 @@ export class FC extends ReactiveFunction {
         newConditions.push(node.left.getText());
       }
 
+      // Check if this node is a child of a conditional expression
       if (
         ts.isConditionalExpression(node.parent) &&
         !context.withinJsxAttribute
       ) {
-        // TODO: Handle combined conditions (ex: condition1 && condition2 ? <div /> : <div />)
+        // TODO: Handle combined conditions (ex: condition1 && condition2 ? <div /> : <span />)
         if (node.parent.whenTrue === node) {
           newConditions.push(node.parent.condition.getText());
         } else if (node.parent.whenFalse === node) {
@@ -150,6 +157,25 @@ export class FC extends ReactiveFunction {
         }
       }
 
+      if (
+        ts.isBinaryExpression(node.parent) &&
+        node.parent.operatorToken.kind ===
+          ts.SyntaxKind.AmpersandAmpersandToken &&
+        node.parent.right === node
+      ) {
+        console.log("---");
+        console.log("Conditional Render");
+        console.log("Condition: ", node.parent.left.getText());
+        console.log("Expression: ", node.getText());
+
+        accessControl.push({
+          expression: node.getText(),
+          conditions: [...context.conditions, ...newConditions],
+        });
+      }
+
+      // Check if this node has a user event
+      // TODO: JSX Self Closing Elements don't have children. Treat them differently.
       if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
         const tagName = node.tagName.getText();
 
@@ -171,7 +197,7 @@ export class FC extends ReactiveFunction {
                 }
               });
 
-              subjects.push({
+              userEvents.push({
                 tagName,
                 propName,
                 propValue,
@@ -200,6 +226,9 @@ export class FC extends ReactiveFunction {
       conditions: [],
     });
 
-    return subjects;
+    return {
+      userEvents,
+      accessControl,
+    };
   }
 }

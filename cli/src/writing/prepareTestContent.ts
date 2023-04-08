@@ -72,7 +72,8 @@ const prepareTestContent = (survey: Survey, filePath: string) => {
       const sources = FC.getSources();
 
       const subjects = FC.getTestSubjects();
-      console.log(subjects);
+      console.log(subjects.userEvents);
+      console.log(subjects.accessControl);
 
       let mockAll = "";
       mockAll += "\n  beforeAll(() => {";
