@@ -1,5 +1,41 @@
 import * as ts from "typescript";
 
+type Call = {
+  functionName: string;
+  args: string[];
+};
+
+const processCallExpression = (node: ts.CallExpression) => {
+  const functionName = node.expression.getText();
+  const args = node.arguments.map((arg) => arg.getText());
+
+  return { functionName, args };
+};
+
+const handleArrowFunctionBody = (node: ts.Node) => {
+  const calls: {
+    functionName: string;
+    args: string[];
+  }[] = [];
+
+  if (ts.isBlock(node)) {
+    ts.forEachChild(node, (statement) => {
+      if (
+        ts.isExpressionStatement(statement) &&
+        ts.isCallExpression(statement.expression)
+      ) {
+        const call = processCallExpression(statement.expression);
+        calls.push(call);
+      }
+    });
+  } else if (ts.isCallExpression(node)) {
+    const call = processCallExpression(node);
+    calls.push(call);
+  }
+
+  return calls;
+};
+
 export class Variable {
   name: string;
   node: ts.VariableStatement;
@@ -128,6 +164,7 @@ export class FC extends ReactiveFunction {
       propValue: string | boolean;
       textChildren: string[];
       conditions: string[];
+      calls: Call[];
     }[] = [];
 
     const visit = (
@@ -179,39 +216,42 @@ export class FC extends ReactiveFunction {
 
       // Check if this node has a user event
       // TODO: JSX Self Closing Elements don't have children. Treat them differently.
-      if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
-        const tagName = node.tagName.getText();
 
-        node.attributes.properties.forEach((prop) => {
-          if (ts.isJsxAttribute(prop)) {
-            const propName = prop.name.getText();
-            const propValue = prop.initializer?.getText() ?? true;
+      // Check if this node has a user event
+      if (ts.isJsxAttribute(node) && node.name.escapedText === "onClick") {
+        const tagName = node.parent.parent.tagName.getText();
+        const propName = node.name.escapedText;
+        const initializer = node.initializer;
+        const propValue = initializer?.getText() ?? true;
 
-            // TODO: Test more user events (ex: onFocus, onBlur, onMouseEnter, onMouseLeave...)
-            if (propName === "onClick") {
-              const textChildren: string[] = [];
+        const calls: Call[] = [];
 
-              ts.forEachChild(node.parent, (child) => {
-                if (ts.isJsxText(child)) {
-                  const textChild = child.getText().trim();
-                  if (textChild) {
-                    textChildren.push(textChild);
-                  }
-                }
-              });
-
-              userEvents.push({
-                tagName,
-                propName,
-                propValue,
-                textChildren,
-                conditions: [...context.conditions, ...newConditions],
-              });
-            }
-          } else if (ts.isJsxSpreadAttribute(prop)) {
-            // TODO: Find test cases in spread attributes
-            const propName = prop.expression.getText();
+        if (initializer && ts.isJsxExpression(initializer)) {
+          const expression = initializer.expression;
+          if (expression && ts.isArrowFunction(expression)) {
+            const newCalls = handleArrowFunctionBody(expression.body);
+            calls.push(...newCalls);
           }
+        }
+
+        const textChildren: string[] = [];
+
+        ts.forEachChild(node.parent.parent.parent, (child) => {
+          if (ts.isJsxText(child)) {
+            const textChild = child.getText().trim();
+            if (textChild) {
+              textChildren.push(textChild);
+            }
+          }
+        });
+
+        userEvents.push({
+          tagName,
+          propName,
+          propValue,
+          calls,
+          textChildren,
+          conditions: context.conditions,
         });
       }
 
