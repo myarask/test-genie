@@ -9,17 +9,13 @@ const extractConditions = (
   expression: ts.Expression,
   conditions: string[] = []
 ) => {
-  if (
-    ts.isBinaryExpression(expression) &&
-    expression.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken
-  ) {
-    extractConditions(expression.left, conditions);
-    extractConditions(expression.right, conditions);
-  } else if (
-    ts.isBinaryExpression(expression) &&
-    expression.operatorToken.kind === ts.SyntaxKind.BarBarToken
-  ) {
-    console.log("BARBAR");
+  if (ts.isBinaryExpression(expression)) {
+    if (
+      expression.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken
+    ) {
+      extractConditions(expression.left, conditions);
+      extractConditions(expression.right, conditions);
+    }
   } else {
     conditions.push(expression.getText());
   }
@@ -35,10 +31,7 @@ const processCallExpression = (node: ts.CallExpression) => {
 };
 
 const handleArrowFunctionBody = (node: ts.Node) => {
-  const calls: {
-    functionName: string;
-    args: string[];
-  }[] = [];
+  const calls: Call[] = [];
 
   if (ts.isBlock(node)) {
     ts.forEachChild(node, (statement) => {
