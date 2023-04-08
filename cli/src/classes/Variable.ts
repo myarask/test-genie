@@ -117,6 +117,7 @@ export class FC extends ReactiveFunction {
 
   getTestSubjects() {
     const accessControl: {
+      // tagName: string;
       expression: string;
       conditions: string[];
     }[] = [];
@@ -161,15 +162,17 @@ export class FC extends ReactiveFunction {
         ts.isBinaryExpression(node.parent) &&
         node.parent.operatorToken.kind ===
           ts.SyntaxKind.AmpersandAmpersandToken &&
-        node.parent.right === node
+        node.parent.right === node &&
+        (ts.isJsxElement(node) || node.getChildren().some(ts.isJsxElement))
       ) {
-        console.log("---");
-        console.log("Conditional Render");
-        console.log("Condition: ", node.parent.left.getText());
-        console.log("Expression: ", node.getText());
+        let expression = node.getText();
+        const child = node.getChildren().find(ts.isJsxElement);
+        if (child) {
+          expression = child.getText();
+        }
 
         accessControl.push({
-          expression: node.getText(),
+          expression,
           conditions: [...context.conditions, ...newConditions],
         });
       }
