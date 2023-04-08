@@ -71,6 +71,9 @@ const prepareTestContent = (survey: Survey, filePath: string) => {
     .map((FC) => {
       const sources = FC.getSources();
 
+      const subjects = FC.getTestSubjects();
+      console.log(subjects);
+
       let mockAll = "";
       mockAll += "\n  beforeAll(() => {";
       mockAll += FC.getHooks()
@@ -86,8 +89,6 @@ const prepareTestContent = (survey: Survey, filePath: string) => {
           hook: any;
           functions: string[];
         }[] = [];
-
-        console.log(interactiveElement.effect);
 
         if (interactiveElement.effect.includes("=>")) {
           // Fat arrow function
@@ -124,8 +125,6 @@ const prepareTestContent = (survey: Survey, filePath: string) => {
             hookMocks.push(effectMock);
           }
         }
-
-        console.log(hookMocks);
 
         testInteractiveElements += "\n";
         testInteractiveElements += `\n  test("[When] the ${interactiveElement.children} ${interactiveElement.role} is clicked [Then] ...", () => {`;

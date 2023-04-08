@@ -113,4 +113,55 @@ export class FC extends ReactiveFunction {
 
     return interactiveElements;
   }
+
+  getTestSubjects() {
+    const subjects: {
+      tagName: string;
+      propName: string;
+      propValue: string | boolean;
+      textChildren: string[];
+    }[] = [];
+
+    const visit = (node: ts.Node) => {
+      if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
+        const tagName = node.tagName.getText();
+
+        node.attributes.properties.forEach((prop) => {
+          if (ts.isJsxAttribute(prop)) {
+            const propName = prop.name.getText();
+            const propValue = prop.initializer?.getText() ?? true;
+
+            if (propName === "onClick") {
+              const textChildren: string[] = [];
+
+              ts.forEachChild(node.parent, (child) => {
+                if (ts.isJsxText(child)) {
+                  const textContent = child.getText().trim();
+                  if (textContent) {
+                    textChildren.push(textContent);
+                  }
+                }
+              });
+
+              subjects.push({
+                tagName,
+                propName,
+                propValue,
+                textChildren,
+              });
+            }
+          } else if (ts.isJsxSpreadAttribute(prop)) {
+            // TODO: Find test cases in spread attributes
+            const propName = prop.expression.getText();
+          }
+        });
+      }
+
+      return ts.forEachChild(node, visit);
+    };
+
+    visit(this.node);
+
+    return subjects;
+  }
 }
