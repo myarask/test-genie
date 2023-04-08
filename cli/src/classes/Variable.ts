@@ -81,6 +81,7 @@ export class ReactiveFunction extends Variable {
 export class Hook extends ReactiveFunction {}
 
 export class FC extends ReactiveFunction {
+  // TODO: Remove this
   getInteractiveElements() {
     const regex =
       /<(.+)(?: .+)? (onClick)={(.+)}(?: .+)?>\n?(.+)\n?( *)<\/.+>/g;
@@ -120,9 +121,35 @@ export class FC extends ReactiveFunction {
       propName: string;
       propValue: string | boolean;
       textChildren: string[];
+      conditions: string[];
     }[] = [];
 
-    const visit = (node: ts.Node) => {
+    const visit = (
+      node: ts.Node,
+      context: { withinJsxAttribute: boolean; conditions: string[] }
+    ) => {
+      const newConditions: string[] = [];
+
+      if (
+        ts.isBinaryExpression(node) &&
+        node.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken
+      ) {
+        // TODO: Handle combined conditions (ex: condition1 && condition2 && <div />)
+        newConditions.push(node.left.getText());
+      }
+
+      if (
+        ts.isConditionalExpression(node.parent) &&
+        !context.withinJsxAttribute
+      ) {
+        // TODO: Handle combined conditions (ex: condition1 && condition2 ? <div /> : <div />)
+        if (node.parent.whenTrue === node) {
+          newConditions.push(node.parent.condition.getText());
+        } else if (node.parent.whenFalse === node) {
+          newConditions.push(`!(${node.parent.condition.getText()})`);
+        }
+      }
+
       if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
         const tagName = node.tagName.getText();
 
@@ -131,14 +158,15 @@ export class FC extends ReactiveFunction {
             const propName = prop.name.getText();
             const propValue = prop.initializer?.getText() ?? true;
 
+            // TODO: Test more user events (ex: onFocus, onBlur, onMouseEnter, onMouseLeave...)
             if (propName === "onClick") {
               const textChildren: string[] = [];
 
               ts.forEachChild(node.parent, (child) => {
                 if (ts.isJsxText(child)) {
-                  const textContent = child.getText().trim();
-                  if (textContent) {
-                    textChildren.push(textContent);
+                  const textChild = child.getText().trim();
+                  if (textChild) {
+                    textChildren.push(textChild);
                   }
                 }
               });
@@ -148,6 +176,7 @@ export class FC extends ReactiveFunction {
                 propName,
                 propValue,
                 textChildren,
+                conditions: [...context.conditions, ...newConditions],
               });
             }
           } else if (ts.isJsxSpreadAttribute(prop)) {
@@ -157,10 +186,19 @@ export class FC extends ReactiveFunction {
         });
       }
 
-      return ts.forEachChild(node, visit);
+      return ts.forEachChild(node, (node) =>
+        visit(node, {
+          withinJsxAttribute:
+            context.withinJsxAttribute || ts.isJsxAttribute(node),
+          conditions: [...context.conditions, ...newConditions],
+        })
+      );
     };
 
-    visit(this.node);
+    visit(this.node, {
+      withinJsxAttribute: false,
+      conditions: [],
+    });
 
     return subjects;
   }
