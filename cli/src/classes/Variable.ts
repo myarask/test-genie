@@ -5,6 +5,28 @@ type Call = {
   args: string[];
 };
 
+const extractConditions = (
+  expression: ts.Expression,
+  conditions: string[] = []
+) => {
+  if (
+    ts.isBinaryExpression(expression) &&
+    expression.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken
+  ) {
+    extractConditions(expression.left, conditions);
+    extractConditions(expression.right, conditions);
+  } else if (
+    ts.isBinaryExpression(expression) &&
+    expression.operatorToken.kind === ts.SyntaxKind.BarBarToken
+  ) {
+    console.log("BARBAR");
+  } else {
+    conditions.push(expression.getText());
+  }
+
+  return conditions;
+};
+
 const processCallExpression = (node: ts.CallExpression) => {
   const functionName = node.expression.getText();
   const args = node.arguments.map((arg) => arg.getText());
@@ -179,7 +201,9 @@ export class FC extends ReactiveFunction {
         node.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken
       ) {
         // TODO: Handle combined conditions (ex: condition1 && condition2 && <div />)
-        newConditions.push(node.left.getText());
+        // TODO: Handle ORs (ex: condition1 || condition2 && <div />)
+
+        newConditions.push(...extractConditions(node.left));
       }
 
       // Check if this node is a child of a conditional expression
@@ -189,8 +213,10 @@ export class FC extends ReactiveFunction {
       ) {
         // TODO: Handle combined conditions (ex: condition1 && condition2 ? <div /> : <span />)
         if (node.parent.whenTrue === node) {
-          newConditions.push(node.parent.condition.getText());
+          // TODO: Handle ORs (ex: condition1 || condition2 ? <div /> : <span />)
+          newConditions.push(...extractConditions(node.parent.condition));
         } else if (node.parent.whenFalse === node) {
+          // TODO:
           newConditions.push(`!(${node.parent.condition.getText()})`);
         }
       }
@@ -213,9 +239,6 @@ export class FC extends ReactiveFunction {
           conditions: [...context.conditions, ...newConditions],
         });
       }
-
-      // Check if this node has a user event
-      // TODO: JSX Self Closing Elements don't have children. Treat them differently.
 
       // Check if this node has a user event
       if (ts.isJsxAttribute(node) && node.name.escapedText === "onClick") {

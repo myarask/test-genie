@@ -43,7 +43,8 @@ const SideNavigation = ({ isExpanded, setIsExpanded }: SideNavigationProps) => {
       {/* 1 test for access conditions on element */}
       {/* 1 test for restriction conditions on element */}
       {/* 1 test for element interactions */}
-      {permissions.canManageMyOrganization && (
+      {(permissions.canManageMyOrganization ||
+        permissions.canManageMyOrganizationMembers) && (
         <Link to="/my-organization">My Organization</Link>
       )}
 
