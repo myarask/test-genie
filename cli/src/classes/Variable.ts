@@ -1,8 +1,28 @@
 import * as ts from "typescript";
+import { extractConditions as getConditionNode } from "./extractConditions";
 
 type Call = {
   functionName: string;
   args: string[];
+};
+
+type UserEvent = {
+  tagName: string;
+  propName: string;
+  propValue: string | boolean;
+  textChildren: string[];
+  conditions: string[];
+  calls: Call[];
+};
+
+type AccessControl = {
+  expression: string;
+  conditions: string[];
+};
+
+type VisitContext = {
+  withinJsxAttribute: boolean;
+  conditions: string[];
 };
 
 const extractConditions = (
@@ -167,25 +187,11 @@ export class FC extends ReactiveFunction {
   }
 
   getTestSubjects() {
-    const accessControl: {
-      // tagName: string;
-      expression: string;
-      conditions: string[];
-    }[] = [];
+    const accessControl: AccessControl[] = [];
 
-    const userEvents: {
-      tagName: string;
-      propName: string;
-      propValue: string | boolean;
-      textChildren: string[];
-      conditions: string[];
-      calls: Call[];
-    }[] = [];
+    const userEvents: UserEvent[] = [];
 
-    const visit = (
-      node: ts.Node,
-      context: { withinJsxAttribute: boolean; conditions: string[] }
-    ) => {
+    const visit = (node: ts.Node, context: VisitContext) => {
       const newConditions: string[] = [];
 
       // Check if there are any conditions on this node
@@ -195,6 +201,7 @@ export class FC extends ReactiveFunction {
       ) {
         // TODO: Handle combined conditions (ex: condition1 && condition2 && <div />)
         // TODO: Handle ORs (ex: condition1 || condition2 && <div />)
+        console.log(getConditionNode(node.left));
 
         newConditions.push(...extractConditions(node.left));
       }
