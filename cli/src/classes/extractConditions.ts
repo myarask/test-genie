@@ -1,20 +1,25 @@
 import * as ts from "typescript";
 
-type ConditionNode = {
-  type: "condition";
-  condition: string;
-} | {
-  type: "and" | "or";
-  left: ConditionNode;
-  right: ConditionNode;
-} | {
-  type: "not";
-  operand: ConditionNode;
-};
+type ConditionNode =
+  | {
+      type: "condition";
+      condition: string;
+    }
+  | {
+      type: "and" | "or";
+      left: ConditionNode;
+      right: ConditionNode;
+    }
+  | {
+      type: "not";
+      operand: ConditionNode;
+    };
 
-function extractConditions(expression: ts.Expression): ConditionNode {
+export function extractConditions(expression: ts.Expression): ConditionNode {
   if (ts.isBinaryExpression(expression)) {
-    if (expression.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken) {
+    if (
+      expression.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken
+    ) {
       return {
         type: "and",
         left: extractConditions(expression.left),
@@ -27,7 +32,10 @@ function extractConditions(expression: ts.Expression): ConditionNode {
         right: extractConditions(expression.right),
       };
     }
-  } else if (ts.isPrefixUnaryExpression(expression) && expression.operator === ts.SyntaxKind.ExclamationToken) {
+  } else if (
+    ts.isPrefixUnaryExpression(expression) &&
+    expression.operator === ts.SyntaxKind.ExclamationToken
+  ) {
     return {
       type: "not",
       operand: extractConditions(expression.operand),
