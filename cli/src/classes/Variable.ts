@@ -1,5 +1,8 @@
 import * as ts from "typescript";
-import { extractConditions as getConditionNode } from "./extractConditions";
+import {
+  ConditionNode,
+  extractConditions as getConditionNode,
+} from "./extractConditions";
 
 type Call = {
   functionName: string;
@@ -12,17 +15,20 @@ type UserEvent = {
   propValue: string | boolean;
   textChildren: string[];
   conditions: string[];
+  conditionNode?: ConditionNode;
   calls: Call[];
 };
 
 type AccessControl = {
   expression: string;
   conditions: string[];
+  conditionNode?: ConditionNode;
 };
 
 type VisitContext = {
   withinJsxAttribute: boolean;
   conditions: string[];
+  conditionNode?: ConditionNode;
 };
 
 const extractConditions = (
@@ -193,15 +199,23 @@ export class FC extends ReactiveFunction {
 
     const visit = (node: ts.Node, context: VisitContext) => {
       const newConditions: string[] = [];
+      let newConditionNode = context.conditionNode;
 
       // Check if there are any conditions on this node
       if (
         ts.isBinaryExpression(node) &&
         node.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken
       ) {
-        // TODO: Handle combined conditions (ex: condition1 && condition2 && <div />)
         // TODO: Handle ORs (ex: condition1 || condition2 && <div />)
-        console.log(getConditionNode(node.left));
+        if (!newConditionNode) {
+          newConditionNode = getConditionNode(node.left);
+        } else {
+          newConditionNode = {
+            type: "and",
+            left: newConditionNode,
+            right: getConditionNode(node.left),
+          };
+        }
 
         newConditions.push(...extractConditions(node.left));
       }
@@ -214,9 +228,15 @@ export class FC extends ReactiveFunction {
         // TODO: Handle combined conditions (ex: condition1 && condition2 ? <div /> : <span />)
         if (node.parent.whenTrue === node) {
           // TODO: Handle ORs (ex: condition1 || condition2 ? <div /> : <span />)
+          if (!newConditionNode) {
+            newConditionNode = getConditionNode(node.parent.condition);
+          }
+
           newConditions.push(...extractConditions(node.parent.condition));
         } else if (node.parent.whenFalse === node) {
-          // TODO:
+          if (!newConditionNode) {
+            newConditionNode = getConditionNode(node.parent.condition);
+          }
           newConditions.push(`!(${node.parent.condition.getText()})`);
         }
       }
@@ -237,6 +257,7 @@ export class FC extends ReactiveFunction {
         accessControl.push({
           expression,
           conditions: [...context.conditions, ...newConditions],
+          conditionNode: newConditionNode,
         });
       }
 
@@ -275,6 +296,7 @@ export class FC extends ReactiveFunction {
           calls,
           textChildren,
           conditions: context.conditions,
+          conditionNode: newConditionNode,
         });
       }
 
@@ -283,6 +305,7 @@ export class FC extends ReactiveFunction {
           withinJsxAttribute:
             context.withinJsxAttribute || ts.isJsxAttribute(node),
           conditions: [...context.conditions, ...newConditions],
+          conditionNode: newConditionNode,
         })
       );
     };
@@ -290,6 +313,7 @@ export class FC extends ReactiveFunction {
     visit(this.node, {
       withinJsxAttribute: false,
       conditions: [],
+      conditionNode: undefined,
     });
 
     return {

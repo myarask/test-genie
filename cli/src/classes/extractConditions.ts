@@ -1,6 +1,6 @@
 import * as ts from "typescript";
 
-type ConditionNode =
+export type ConditionNode =
   | {
       type: "condition";
       condition: string;
