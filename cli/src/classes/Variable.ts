@@ -14,20 +14,17 @@ type UserEvent = {
   propName: string;
   propValue: string | boolean;
   textChildren: string[];
-  conditions: string[];
   conditionNode?: ConditionNode;
   calls: Call[];
 };
 
 type AccessControl = {
   expression: string;
-  conditions: string[];
   conditionNode?: ConditionNode;
 };
 
 type VisitContext = {
   withinJsxAttribute: boolean;
-  conditions: string[];
   conditionNode?: ConditionNode;
 };
 
@@ -198,7 +195,6 @@ export class FC extends ReactiveFunction {
     const userEvents: UserEvent[] = [];
 
     const visit = (node: ts.Node, context: VisitContext) => {
-      const newConditions: string[] = [];
       let newConditionNode = context.conditionNode;
 
       // Check if there are any conditions on this node
@@ -220,8 +216,6 @@ export class FC extends ReactiveFunction {
             right: getConditionNode(node.left),
           };
         }
-
-        newConditions.push(...extractConditions(node.left));
       }
 
       if (
@@ -240,14 +234,11 @@ export class FC extends ReactiveFunction {
           };
         }
 
-        if (node.parent.whenTrue === node) {
-          newConditions.push(...extractConditions(node.parent.condition));
-        } else if (node.parent.whenFalse === node) {
+        if (node.parent.whenFalse === node) {
           newConditionNode = {
             type: "not",
             operand: newConditionNode,
           };
-          newConditions.push(`!(${node.parent.condition.getText()})`);
         }
       } else if (
         ts.isBinaryExpression(node.parent) &&
@@ -266,7 +257,6 @@ export class FC extends ReactiveFunction {
 
         accessControl.push({
           expression,
-          conditions: [...context.conditions, ...newConditions],
           conditionNode: newConditionNode,
         });
       }
@@ -305,7 +295,6 @@ export class FC extends ReactiveFunction {
           propValue,
           calls,
           textChildren,
-          conditions: context.conditions,
           conditionNode: newConditionNode,
         });
       }
@@ -314,7 +303,6 @@ export class FC extends ReactiveFunction {
         visit(node, {
           withinJsxAttribute:
             context.withinJsxAttribute || ts.isJsxAttribute(node),
-          conditions: [...context.conditions, ...newConditions],
           conditionNode: newConditionNode,
         })
       );
@@ -322,8 +310,7 @@ export class FC extends ReactiveFunction {
 
     visit(this.node, {
       withinJsxAttribute: false,
-      conditions: [],
-      conditionNode: undefined,
+      conditionNode: undefined, // TODO: Better name?
     });
 
     return {
