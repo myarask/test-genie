@@ -16,6 +16,11 @@ export type ConditionNode =
     };
 
 export function extractConditions(expression: ts.Expression): ConditionNode {
+  // Unwrap parenthesized expressions
+  while (ts.isParenthesizedExpression(expression)) {
+    expression = expression.expression;
+  }
+
   if (ts.isBinaryExpression(expression)) {
     if (
       expression.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken

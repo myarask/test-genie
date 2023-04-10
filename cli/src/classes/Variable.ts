@@ -204,14 +204,18 @@ export class FC extends ReactiveFunction {
       // Check if there are any conditions on this node
       if (
         ts.isBinaryExpression(node) &&
-        node.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken
+        (node.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken ||
+          node.operatorToken.kind === ts.SyntaxKind.BarBarToken)
       ) {
-        // TODO: Handle ORs (ex: condition1 || condition2 && <div />)
         if (!newConditionNode) {
           newConditionNode = getConditionNode(node.left);
         } else {
+          const type =
+            node.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken
+              ? "and"
+              : "or";
           newConditionNode = {
-            type: "and",
+            type,
             left: newConditionNode,
             right: getConditionNode(node.left),
           };
