@@ -140,7 +140,7 @@ export class ReactiveFunction extends Variable {
   }
 
   getSources() {
-    // TODO: Implement. Not hardcode.
+    // TODO: Remove this
     const sources = {
       launch: {
         killerApp: "useKillerApp",
@@ -224,34 +224,40 @@ export class FC extends ReactiveFunction {
         newConditions.push(...extractConditions(node.left));
       }
 
-      // Check if this node is a child of a conditional expression
       if (
         ts.isConditionalExpression(node.parent) &&
         !context.withinJsxAttribute
       ) {
-        // TODO: Handle combined conditions (ex: condition1 && condition2 ? <div /> : <span />)
-        if (node.parent.whenTrue === node) {
-          // TODO: Handle ORs (ex: condition1 || condition2 ? <div /> : <span />)
-          if (!newConditionNode) {
-            newConditionNode = getConditionNode(node.parent.condition);
-          }
+        // Found a conditional expression
+        // Ex: {isAuthenticated ? <button>Logout</button> : <button>Login</button>}
+        if (!newConditionNode) {
+          newConditionNode = getConditionNode(node.parent.condition);
+        } else {
+          newConditionNode = {
+            type: "and",
+            left: newConditionNode,
+            right: getConditionNode(node.parent.condition),
+          };
+        }
 
+        if (node.parent.whenTrue === node) {
           newConditions.push(...extractConditions(node.parent.condition));
         } else if (node.parent.whenFalse === node) {
-          if (!newConditionNode) {
-            newConditionNode = getConditionNode(node.parent.condition);
-          }
+          newConditionNode = {
+            type: "not",
+            operand: newConditionNode,
+          };
           newConditions.push(`!(${node.parent.condition.getText()})`);
         }
-      }
-
-      if (
+      } else if (
         ts.isBinaryExpression(node.parent) &&
         node.parent.operatorToken.kind ===
           ts.SyntaxKind.AmpersandAmpersandToken &&
         node.parent.right === node &&
         (ts.isJsxElement(node) || node.getChildren().some(ts.isJsxElement))
       ) {
+        // Found a conditional element
+        // Ex: {isAuthenticated && <div>Authenticated</div>}
         let expression = node.getText();
         const child = node.getChildren().find(ts.isJsxElement);
         if (child) {
