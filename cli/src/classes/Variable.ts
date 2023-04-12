@@ -135,60 +135,11 @@ export class ReactiveFunction extends Variable {
 
     return hooks;
   }
-
-  getSources() {
-    // TODO: Remove this
-    const sources = {
-      launch: {
-        killerApp: "useKillerApp",
-      },
-      loginWithRedirect: {
-        auth0: "useAuth0",
-      },
-      setIsExpanded: "props",
-    };
-
-    return sources;
-  }
 }
 
 export class Hook extends ReactiveFunction {}
 
 export class FC extends ReactiveFunction {
-  // TODO: Remove this
-  getInteractiveElements() {
-    const regex =
-      /<(.+)(?: .+)? (onClick)={(.+)}(?: .+)?>\n?(.+)\n?( *)<\/.+>/g;
-    let m;
-
-    const interactiveElements: {
-      text: string;
-      element: string;
-      event: "onClick" | "onFocus" | "onBlur" | "onMouseEnter" | "onMouseLeave";
-      role: "button" | "link" | "input" | "select" | "textarea";
-      children: string;
-      effect: string;
-    }[] = [];
-
-    while ((m = regex.exec(this.node.getText())) !== null) {
-      // This is necessary to avoid infinite loops with zero-width matches
-      if (m.index === regex.lastIndex) {
-        regex.lastIndex++;
-      }
-
-      interactiveElements.push({
-        text: m[0],
-        element: m[1],
-        event: m[2],
-        effect: m[3],
-        children: m[4].trim(),
-        role: "button", // TODO: Implement role detection
-      });
-    }
-
-    return interactiveElements;
-  }
-
   getTestSubjects() {
     const accessControl: AccessControl[] = [];
 
@@ -197,12 +148,13 @@ export class FC extends ReactiveFunction {
     const visit = (node: ts.Node, context: VisitContext) => {
       let newConditionNode = context.conditionNode;
 
-      // Check if there are any conditions on this node
       if (
         ts.isBinaryExpression(node) &&
         (node.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken ||
           node.operatorToken.kind === ts.SyntaxKind.BarBarToken)
       ) {
+        // This is a conditional expression
+        // Ex: {isAuthenticated && <div>Authenticated</div>}
         if (!newConditionNode) {
           newConditionNode = getConditionNode(node.left);
         } else {
@@ -310,7 +262,7 @@ export class FC extends ReactiveFunction {
 
     visit(this.node, {
       withinJsxAttribute: false,
-      conditionNode: undefined, // TODO: Better name?
+      conditionNode: undefined,
     });
 
     return {
