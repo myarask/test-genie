@@ -1,8 +1,6 @@
 import Survey from "../classes/Survey";
 
 const prepareTestContent = (survey: Survey, filePath: string) => {
-  // console.log(surveyedFile);
-
   let importTestTools = "";
   if (survey.getFCs().length) {
     // Import render and screen when there are functional components

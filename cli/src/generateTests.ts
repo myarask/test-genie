@@ -12,14 +12,6 @@ const generateTests = async (filePath: string) => {
   // Do not test barrel files
   if (survey.isBarrelFile()) return;
 
-  // console.log({
-  //   filePath,
-  //   namedExports: survey.getNamedExports(),
-  //   defaultExport: survey.getDefaultExport(),
-  //   FCs: survey.getFCs(),
-  //   hooks: survey.getHooks(),
-  // });
-
   const testContent = prepareTestContent(survey, filePath);
   writeTestFile(filePath, testContent);
 };

@@ -199,7 +199,7 @@ export class FC extends ReactiveFunction {
         node.parent.right === node &&
         (ts.isJsxElement(node) || node.getChildren().some(ts.isJsxElement))
       ) {
-        // Found a conditional element
+        // Found a binary expression with a JSX element
         // Ex: {isAuthenticated && <div>Authenticated</div>}
         let expression = node.getText();
         const child = node.getChildren().find(ts.isJsxElement);
@@ -224,15 +224,26 @@ export class FC extends ReactiveFunction {
 
         if (initializer && ts.isJsxExpression(initializer)) {
           const expression = initializer.expression;
-          if (expression && ts.isArrowFunction(expression)) {
-            const newCalls = handleArrowFunctionBody(expression.body);
-            calls.push(...newCalls);
+
+          if (expression) {
+            if (ts.isArrowFunction(expression)) {
+              // Ex: onClick={() => doSomething()}
+              const newCalls = handleArrowFunctionBody(expression.body);
+              calls.push(...newCalls);
+            } else {
+              // Ex: onClick={doSomething}
+              calls.push({
+                functionName: expression.getText(),
+                args: [],
+              });
+            }
           }
         }
 
         const textChildren: string[] = [];
 
         ts.forEachChild(node.parent.parent.parent, (child) => {
+          // Gets "Click me" from <button onClick={doSomething}>Click me</button>
           if (ts.isJsxText(child)) {
             const textChild = child.getText().trim();
             if (textChild) {
