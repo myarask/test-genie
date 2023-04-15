@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 
-export const useKillerApp = () => {
+export const useKillerApp = (): {
+  launch: () => void;
+} => {
   const launch = useMemo(
     () => () => {
       console.log("lauching killer app ;)");

@@ -38,8 +38,8 @@ const prepareTestContent = (survey: Survey, filePath: string) => {
     .getFCs()
     .map((FC) => {
       const subjects = FC.getTestSubjects();
-      console.log(JSON.stringify(subjects.userEvents, null, 2));
-      console.log(JSON.stringify(subjects.accessControl, null, 2));
+      // console.log(JSON.stringify(subjects.userEvents, null, 2));
+      // console.log(JSON.stringify(subjects.accessControl, null, 2));
 
       if (
         subjects.userEvents.length &&

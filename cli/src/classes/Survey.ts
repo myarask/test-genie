@@ -1,37 +1,54 @@
 import * as ts from "typescript";
+import * as fs from "fs";
+import * as path from "path";
 import { FC, Hook, Variable } from "./Variable";
 
+// TODO: Move this function
+const logVariableDeclarationsAndTypes = (
+  sourceFile: ts.SourceFile,
+  typeChecker: ts.TypeChecker
+) => {
+  function visit(node: ts.Node) {
+    if (ts.isVariableDeclaration(node)) {
+      const name = node.name.getText();
+      const type = typeChecker.getTypeAtLocation(node);
+      const typeText = typeChecker.typeToString(type);
+      console.log(`Variable ${name} has type ${typeText}`);
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+};
+
 class Survey {
-  lines: string[];
-  fileContent: string;
   sourceFile: ts.SourceFile;
 
-  constructor(fileContent: string) {
-    const sourceFile = ts.createSourceFile(
-      "temp.ts",
-      fileContent,
-      ts.ScriptTarget.Latest,
-      true,
-      ts.ScriptKind.TSX
+  constructor(filePath: string) {
+    // TODO: Do not hardcode tsConfigPath
+    const tsConfigPath = path.resolve("../samples/tsconfig.json");
+    const tsConfigText = fs.readFileSync(tsConfigPath, "utf8");
+    const tsConfig = ts.parseConfigFileTextToJson(tsConfigPath, tsConfigText);
+    const parsedCommandLine = ts.parseJsonConfigFileContent(
+      tsConfig.config,
+      ts.sys,
+      path.dirname(tsConfigPath)
     );
-    const printer = ts.createPrinter({ removeComments: true });
 
-    // Remove comments and empty lines
+    const program = ts.createProgram({
+      rootNames: parsedCommandLine.fileNames.concat(filePath),
+      options: parsedCommandLine.options,
+    });
 
-    this.lines = printer
-      .printFile(sourceFile)
-      .split("\n")
-      .filter((line) => line.trim() !== "");
+    const typeChecker = program.getTypeChecker();
+    const sourceFile = program.getSourceFile(filePath);
 
-    this.fileContent = this.lines.join("\n");
+    if (!sourceFile) {
+      throw new Error(`Could not find source file: ${filePath}`);
+    }
 
-    this.sourceFile = ts.createSourceFile(
-      "temp.ts",
-      this.fileContent,
-      ts.ScriptTarget.Latest,
-      true,
-      ts.ScriptKind.TSX
-    );
+    this.sourceFile = sourceFile;
+    logVariableDeclarationsAndTypes(sourceFile, typeChecker);
   }
 
   isBarrelFile() {
