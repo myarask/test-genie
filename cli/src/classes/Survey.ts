@@ -24,23 +24,11 @@ const logVariableDeclarationsAndTypes = (
 class Survey {
   sourceFile: ts.SourceFile;
 
-  constructor(filePath: string) {
-    // TODO: Do not hardcode tsConfigPath
-    const tsConfigPath = path.resolve("../samples/tsconfig.json");
-    const tsConfigText = fs.readFileSync(tsConfigPath, "utf8");
-    const tsConfig = ts.parseConfigFileTextToJson(tsConfigPath, tsConfigText);
-    const parsedCommandLine = ts.parseJsonConfigFileContent(
-      tsConfig.config,
-      ts.sys,
-      path.dirname(tsConfigPath)
-    );
-
-    const program = ts.createProgram({
-      rootNames: parsedCommandLine.fileNames.concat(filePath),
-      options: parsedCommandLine.options,
-    });
-
-    const typeChecker = program.getTypeChecker();
+  constructor(
+    filePath: string,
+    program: ts.Program,
+    typeChecker: ts.TypeChecker
+  ) {
     const sourceFile = program.getSourceFile(filePath);
 
     if (!sourceFile) {
