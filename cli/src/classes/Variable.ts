@@ -107,6 +107,33 @@ export class Variable {
 }
 
 export class ReactiveFunction extends Variable {
+  getProps() {
+    const props: {
+      name: string;
+      type: string;
+      isRequired: boolean;
+      defaultValue?: any;
+      // Enumerated values: If a prop has a limited set of valid values (like an enum), your mock data should only include values from that set.
+      // Nested prop types: If a prop has a complex type with nested properties, you'll need to collect information about the nested properties as well to generate accurate mock data.
+      // Imported types: If a component imports its prop types from another file of library, your script should be able to resolve the imported types and collect the necessary information about them.
+    }[] = [
+      {
+        name: "isExpanded",
+        type: "boolean",
+        isRequired: true,
+      },
+      {
+        name: "setIsExpanded",
+        type: "(isExpanded: boolean) => void",
+        isRequired: true,
+      },
+    ];
+
+    console.log({ props });
+
+    return props;
+  }
+
   getHooks() {
     const regex = /(const|var|let) (.+) = (use.+)\(\)/g;
     const text = this.node.getText();
