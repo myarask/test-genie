@@ -1,6 +1,4 @@
 import * as ts from "typescript";
-import * as fs from "fs";
-import * as path from "path";
 import { FC, Hook, Variable } from "./Variable";
 
 // TODO: Move this function

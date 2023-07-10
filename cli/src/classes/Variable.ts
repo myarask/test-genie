@@ -160,6 +160,8 @@ export class ReactiveFunction extends Variable {
       });
     }
 
+    console.log(hooks);
+
     return hooks;
   }
 }
@@ -167,6 +169,52 @@ export class ReactiveFunction extends Variable {
 export class Hook extends ReactiveFunction {}
 
 export class FC extends ReactiveFunction {
+  getMockables() {
+    const mockables = [
+      {
+        name: "usePermissions",
+        returns: "permissions",
+        controls: [
+          "permissions.canViewStats",
+          "permissions.canManageMyOrganization",
+          "permissions.canManageMyOrganizationMembers",
+          "permissions.canManageMyOrganizationSettings",
+          "permissions.canManageMyOrganizationTeams",
+          "permissions.canManageMyOrganizationProjects",
+        ],
+        category: "hook",
+        type: `() => {
+          canViewStats: boolean;
+          canManageMyOrganization: boolean;
+          canManageMyOrganizationMembers: boolean;
+          canManageMyOrganizationSettings: boolean;
+          canManageMyOrganizationTeams: boolean;
+          canManageMyOrganizationProjects: boolean;
+        }`,
+        returnType: `{
+          canViewStats: boolean;
+          canManageMyOrganization: boolean;
+          canManageMyOrganizationMembers: boolean;
+          canManageMyOrganizationSettings: boolean;
+          canManageMyOrganizationTeams: boolean;
+          canManageMyOrganizationProjects: boolean;
+        }`,
+        baseReturnValue: "{}",
+      },
+      {
+        name: "useEntitlements",
+        returns: "entitlements",
+        controls: [
+          "entitlements.length",
+          "entitlements.includes('sales')",
+          "entitlements.includes('marketing')",
+        ],
+      },
+    ];
+
+    return mockables;
+  }
+
   getTestSubjects() {
     const accessControl: AccessControl[] = [];
 
